@@ -1,6 +1,13 @@
 streamlit
 pandas
-reportlab
+matplotlib
+openai
+google-auth
 gspread
 oauth2client
-openpyxl
+python-docx
+python-pptx
+PyPDF2
+numpy
+email-validator
+jinja2
