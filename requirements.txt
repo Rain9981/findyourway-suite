@@ -11,3 +11,4 @@ PyPDF2
 numpy
 email-validator
 jinja2
+reportlab
