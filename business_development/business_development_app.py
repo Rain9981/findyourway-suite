@@ -1,30 +1,32 @@
 import streamlit as st
-import pandas as pd
-import openai
+from openai import OpenAI
+from backend.google_sheets import save_data
 
-
-openai.api_key = st.secrets['openai']['api_key']
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("💼 Business Development")
-    st.markdown("### Plan business expansion.")
+    st.title("📈 Business Development")
+    st.markdown("### Develop business opportunities")
 
-    dev_goals = st.text_area("Growth Goals")
+    product = st.text_input("Your product or service")
+    goal = st.text_input("Growth goal")
 
-    if st.button("Run GPT Analysis"):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Analyze the following input: "},
-                {"role": "user", "content": business_name if 'business_name' in locals() else 'N/A'}
-            ]
-        )
-        st.success(response['choices'][0]['message']['content'].strip())
+    if st.button("Get Strategy"):
+        try:
+            query = f"Suggest a business development plan for '{product}' to achieve '{goal}'."
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a business strategist."},
+                    {"role": "user", "content": query}
+                ]
+            )
+            st.success(response.choices[0].message.content.strip())
+        except Exception as e:
+            st.error(f"❌ GPT failed: {e}")
 
-    # Google Sheets saving (optional backend logic)
     try:
-        from backend.google_sheets import save_data
-        save_data(st.session_state.get("user_role", "guest"), locals())
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="BizDev")
         st.info("✅ Data saved to Google Sheets.")
-    except:
-        st.warning("Google Sheets not connected.")
+    except Exception as e:
+        st.warning(f"Google Sheets not connected. Error: {e}")

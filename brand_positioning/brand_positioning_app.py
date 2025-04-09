@@ -1,47 +1,33 @@
 import streamlit as st
-import pandas as pd
-import openai
+from openai import OpenAI
 import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from backend.google_sheets import save_data
 
-openai.api_key = st.secrets['openai']['api_key']
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("🎯 Brand Positioning")
-    st.markdown("### Clarify brand message.")
+    st.title("🧭 Brand Positioning")
+    st.markdown("### Define your unique market identity")
 
-    brand_promise = st.text_input("Brand Promise")
-    target_market = st.text_input("Target Market")
+    brand_description = st.text_area("Describe your brand")
+    
+    if st.button("Analyze Brand"):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a brand strategist."},
+                    {"role": "user", "content": brand_description}
+                ]
+            )
+            st.success(response.choices[0].message.content.strip())
+        except Exception as e:
+            st.error(f"❌ GPT failed: {e}")
 
-    if st.button("Run GPT Analysis"):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Analyze the following input: "},
-                {"role": "user", "content": business_name if 'business_name' in locals() else 'N/A'}
-            ]
-        )
-        st.success(response['choices'][0]['message']['content'].strip())
-
-    # Google Sheets saving (optional backend logic)
     try:
-        from backend.google_sheets import save_data
-        save_data(st.session_state.get("user_role", "guest"), locals())
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="BrandPositioning")
         st.info("✅ Data saved to Google Sheets.")
-    except:
-        st.warning("Google Sheets not connected.")
-
-    if st.button("Export to PDF"):
-        buffer = io.BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Consulting Report")
-        c.drawString(100, 735, "------------------")
-        y = 720
-        for k, v in locals().items():
-            if not k.startswith("_"):
-                c.drawString(100, y, f"{k}: {v}")
-                y -= 15
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="report.pdf")
+    except Exception as e:
+        st.warning(f"Google Sheets not connected. Error: {e}")

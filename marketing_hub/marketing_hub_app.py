@@ -1,39 +1,30 @@
 import streamlit as st
-import pandas as pd
-import openai
-import io
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
+from openai import OpenAI
+from backend.google_sheets import save_data
 
-openai.api_key = st.secrets['openai']['api_key']
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
     st.title("📢 Marketing Hub")
-    st.markdown("### Marketing scripts and tools.")
+    st.markdown("### Get AI-powered marketing suggestions")
 
-    campaign = st.text_input("Campaign Name")
-    copy = st.text_area("Marketing Copy")
+    campaign_goal = st.text_area("Marketing Campaign Goal")
 
-    if st.button("Run GPT Analysis"):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Analyze the following input: "},
-                {"role": "user", "content": business_name if 'business_name' in locals() else 'N/A'}
-            ]
-        )
-        st.success(response['choices'][0]['message']['content'].strip())
+    if st.button("Run GPT Marketing Advice"):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You're a digital marketing consultant."},
+                    {"role": "user", "content": campaign_goal}
+                ]
+            )
+            st.success(response.choices[0].message.content.strip())
+        except Exception as e:
+            st.error(f"❌ GPT failed: {e}")
 
-    if st.button("Export to PDF"):
-        buffer = io.BytesIO()
-        c = canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Consulting Report")
-        c.drawString(100, 735, "------------------")
-        y = 720
-        for k, v in locals().items():
-            if not k.startswith("_"):
-                c.drawString(100, y, f"{k}: {v}")
-                y -= 15
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="report.pdf")
+    try:
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="MarketingHub")
+        st.info("✅ Data saved to Google Sheets.")
+    except Exception as e:
+        st.warning(f"Google Sheets not connected. Error: {e}")
