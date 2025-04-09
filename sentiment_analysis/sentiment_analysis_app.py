@@ -18,9 +18,9 @@ def run():
     if st.button("Run GPT Analysis") and query.strip():
         try:
             response = client.chat.completions.create(
-                model="gpt-4-1106-preview",
+                model="gpt-4",
                 messages=[
-                    {"role": "system", "content": "You are a helpful business sentiment analysis expert."},
+                    {"role": "system", "content": "You are a helpful assistant."},
                     {"role": "user", "content": query}
                 ]
             )
