@@ -8,43 +8,45 @@ from reportlab.lib.pagesizes import letter
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("growth".replace("_", " ").title())
+    st.title("AI Tool: " + "growth".replace("_", " ").title())
+    st.markdown("### Use GPT-4o to assist your business strategy.")
 
-    # Sidebar consulting guide
-    with st.sidebar:
-        st.header("📌 Guide")
-        st.markdown("**Input Advice:** Enter a clear business prompt.\n\n**Tool Purpose:** GPT-powered insights, PDF export, and auto Google Sheets saving.\n\n**Consulting Tip:** Use this tab to quickly evaluate or simulate strategies.")
+    user_input = st.text_area("Enter prompt or info:", key=f"{tab}_input")
 
-    user_input = st.text_area("Enter prompt or info:")
-
-    if st.button("Run GPT-4o Analysis") and user_input:
+    if st.button("Run GPT Analysis", key=f"{tab}_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a helpful AI consultant."},
+                    {"role": "system", "content": "You are a business strategy assistant."},
                     {"role": "user", "content": user_input}
                 ]
             )
             st.success(response.choices[0].message.content.strip())
         except Exception as e:
-            st.error(f"❌ GPT failed: {e}")
+            st.error(f"❌ GPT Analysis failed: {e}")
 
     try:
         save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="growth")
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
-        st.warning(f"⚠️ Google Sheets not connected: {e}")
+        st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export PDF"):
+    if st.button("Export to PDF", key=f"{tab}_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Consulting Report")
-        y = 735
+        y = 750
+        c.drawString(100, y, f"Report: {tab.replace('_', ' ').title()}")
+        y -= 20
         for k, v in locals().items():
             if not k.startswith("_"):
                 c.drawString(100, y, f"{k}: {v}")
                 y -= 15
         c.save()
         buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="report.pdf")
+        st.download_button("Download PDF", buffer, file_name=f"{tab}_report.pdf")
+
+    # Sidebar guide
+    with st.sidebar:
+        st.markdown("## 🧠 Consulting Insights")
+        st.info(f"Use this tool to analyze and improve your business's {tab.replace('_', ' ')}. Ideal input: pain points, questions, or data insights.")
