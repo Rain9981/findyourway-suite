@@ -21,25 +21,25 @@ if "logged_in" not in st.session_state:
 
 if not st.session_state["logged_in"]:
     st.title("🔐 Login to Find Your Way Suite")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+    password = st.text_input("Enter access password:", type="password")
+
     if st.button("Login"):
         if password == "FindYourWayNMC520":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "admin"
-            st.experimental_rerun()
-        elif password == "elite":
-            st.session_state["logged_in"] = True
-            st.session_state["user_role"] = "elite"
-            st.experimental_rerun()
+            st.rerun()
         elif password == "premium":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "premium"
-            st.experimental_rerun()
+            st.rerun()
+        elif password == "elite":
+            st.session_state["logged_in"] = True
+            st.session_state["user_role"] = "elite"
+            st.rerun()
         elif password == "basic":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "basic"
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid password")
     st.stop()
