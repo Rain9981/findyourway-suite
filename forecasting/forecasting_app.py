@@ -20,9 +20,9 @@ def run():
         from backend.google_sheets import save_data
         save_data(st.session_state.get("user_role", "guest"), locals())
         st.info("✅ Data saved to Google Sheets.")
-    except:
-        st.warning("Google Sheets not connected.")
-        st.error(f"Error: {e}")
+    except Exception as e:
+        st.error(f"Google Sheets not connected. Error: {e}")
+
 
     if st.button("Export to PDF"):
         buffer = io.BytesIO()
