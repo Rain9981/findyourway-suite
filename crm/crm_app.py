@@ -7,18 +7,35 @@ from reportlab.lib.pagesizes import letter
 
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-def run():
-    st.title("AI Tool: " + "crm".replace("_", " ").title())
-    st.markdown("### Use GPT-4o to enhance your strategy or operations.")
-    user_input = st.text_area("Enter prompt or info:", key="crm_input")
+TAB_LABEL = "crm".replace("_", " ").title()
 
-    if st.button("Run GPT Analysis", key="crm_run") and user_input:
+def run():
+    st.title("AI Tool: " + TAB_LABEL)
+    st.markdown("### Use GPT-4o to assist your business strategy.")
+
+    # Smart Input Prompt
+    prompt_label = {
+        "brand_positioning": "Describe your brand and audience",
+        "business_development": "Describe your current growth plan",
+        "lead_generation": "What product/service are you selling?",
+        "strategy_designer": "What goal or outcome are you designing for?",
+        "forecasting": "Enter data trends, dates, or sales info",
+        "sentiment_analysis": "Enter customer or public comments",
+        "strategic_simulator": "Describe your strategy scenario",
+        "marketing_hub": "What are your marketing goals?",
+        "crm_dashboard": "Enter client notes, stages, or updates",
+    }.get("crm", "Enter prompt or info:")
+
+    user_input = st.text_area(prompt_label, key=f"{tab}_input")
+
+    # GPT Autofill
+    if st.button("Run GPT Analysis", key=f"{tab}_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a helpful business consultant."},
-                    {"role": "user", "content": user_input}
+                    {"role": "system", "content": f"You are a business consultant helping with {TAB_LABEL}"},
+                    {"role": "user", "content": user_input},
                 ]
             )
             st.success(response.choices[0].message.content.strip())
@@ -26,15 +43,15 @@ def run():
             st.error(f"❌ GPT Analysis failed: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="crm".replace("_", " ").title())
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab=TAB_LABEL)
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export to PDF", key="crm_pdf"):
+    if st.button("Export to PDF", key=f"{tab}_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, f"Report: crm".replace("_", " ").title())
+        c.drawString(100, 750, "Consulting Report")
         y = 735
         for k, v in locals().items():
             if not k.startswith("_"):
@@ -44,10 +61,10 @@ def run():
         buffer.seek(0)
         st.download_button("Download PDF", buffer, file_name="report.pdf")
 
-    # 🧭 Sidebar consulting insights
+    # Sidebar Guide
     with st.sidebar:
-        st.markdown("## 💡 Guide")
-        st.write(f"This tab helps analyze or build insights for **{'crm'.replace('_', ' ').title()}**.")
-        st.markdown("- Provide a clear question or topic.")
-        st.markdown("- Click **Run GPT Analysis** to see suggestions.")
-        st.markdown("- Export results or save to your Sheets.")
+        st.subheader("💡 Guide")
+        st.markdown(f"**This tab:** {TAB_LABEL}")
+        st.markdown("- What to enter: A specific question or scenario")
+        st.markdown("- What this helps you do: Generate insights")
+        st.markdown("- How to interpret: Use suggestions as action steps")
