@@ -7,64 +7,42 @@ from reportlab.lib.pagesizes import letter
 
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-TAB_LABEL = "business_development".replace("_", " ").title()
-
 def run():
-    st.title("AI Tool: " + TAB_LABEL)
-    st.markdown("### Use GPT-4o to assist your business strategy.")
+    st.title("AI Tool: Business Development")
+    prompt_label = "What would you like help with regarding Business Development?"
+    st.sidebar.header("💡 Guide")
+    st.sidebar.write("**This tab helps you:**")
+    st.sidebar.write("- Uncover partnerships, new markets, and sales strategies.")
+    st.sidebar.write("- Use GPT-4o to enhance decision-making.")
+    st.sidebar.write("- Save to Sheets or export a PDF.")
 
-    # Smart Input Prompt
-    prompt_label = {
-        "brand_positioning": "Describe your brand and audience",
-        "business_development": "Describe your current growth plan",
-        "lead_generation": "What product/service are you selling?",
-        "strategy_designer": "What goal or outcome are you designing for?",
-        "forecasting": "Enter data trends, dates, or sales info",
-        "sentiment_analysis": "Enter customer or public comments",
-        "strategic_simulator": "Describe your strategy scenario",
-        "marketing_hub": "What are your marketing goals?",
-        "crm_dashboard": "Enter client notes, stages, or updates",
-    }.get("business_development", "Enter prompt or info:")
+    user_input = st.text_area(prompt_label, key="business_development_input")
 
-    user_input = st.text_area(prompt_label, key=f"{tab}_input")
-
-    # GPT Autofill
-    if st.button("Run GPT Analysis", key=f"{tab}_run") and user_input:
+    if st.button("Run GPT Analysis", key="business_development_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": f"You are a business consultant helping with {TAB_LABEL}"},
-                    {"role": "user", "content": user_input},
+                    {"role": "system", "content": "You are a helpful assistant for Business Development."},
+                    {"role": "user", "content": user_input}
                 ]
             )
             st.success(response.choices[0].message.content.strip())
         except Exception as e:
-            st.error(f"❌ GPT Analysis failed: {e}")
+            st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab=TAB_LABEL)
+        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Business Development")
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export to PDF", key=f"{tab}_pdf"):
+    if st.button("Export to PDF", key="business_development_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Consulting Report")
-        y = 735
-        for k, v in locals().items():
-            if not k.startswith("_"):
-                c.drawString(100, y, f"{k}: {v}")
-                y -= 15
+        c.drawString(100, 750, "Consulting Report - Business Development")
+        c.drawString(100, 735, f"Input: {user_input}")
         c.save()
         buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="report.pdf")
+        st.download_button("Download PDF", buffer, file_name="business_development_report.pdf")
 
-    # Sidebar Guide
-    with st.sidebar:
-        st.subheader("💡 Guide")
-        st.markdown(f"**This tab:** {TAB_LABEL}")
-        st.markdown("- What to enter: A specific question or scenario")
-        st.markdown("- What this helps you do: Generate insights")
-        st.markdown("- How to interpret: Use suggestions as action steps")
