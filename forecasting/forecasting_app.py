@@ -18,10 +18,11 @@ def run():
     # Google Sheets saving (optional backend logic)
     try:
         from backend.google_sheets import save_data
-        save_data(st.session_state.get("user_role", "guest"), locals())
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="Forecasting")
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
-        st.error(f"Google Sheets not connected. Error: {e}")
+        st.warning(f"Google Sheets not connected. Error: {e}")
+
 
 
     if st.button("Export to PDF"):
