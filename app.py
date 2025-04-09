@@ -35,7 +35,7 @@ if not st.session_state.logged_in:
             st.session_state.logged_in = True
             st.session_state.user_role = roles[password]
             st.success(f"✅ Logged in as {st.session_state.user_role.capitalize()}")
-            st.experimental_rerun()
+            st.rerun()  # ✅ Safe for Streamlit Cloud
         else:
             st.error("❌ Incorrect password")
     st.stop()
