@@ -8,38 +8,33 @@ from reportlab.lib.pagesizes import letter
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("brand_positioning".replace("_", " ").title())
+    st.title("AI Tool: " + "brand_positioning".replace("_", " ").title())
+    st.markdown("### Use GPT-4o to enhance your strategy or operations.")
+    user_input = st.text_area("Enter prompt or info:", key="brand_positioning_input")
 
-    # Sidebar consulting guide
-    with st.sidebar:
-        st.header("📌 Guide")
-        st.markdown("**Input Advice:** Enter a clear business prompt.\n\n**Tool Purpose:** GPT-powered insights, PDF export, and auto Google Sheets saving.\n\n**Consulting Tip:** Use this tab to quickly evaluate or simulate strategies.")
-
-    user_input = st.text_area("Enter prompt or info:")
-
-    if st.button("Run GPT-4o Analysis") and user_input:
+    if st.button("Run GPT Analysis", key="brand_positioning_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a helpful AI consultant."},
+                    {"role": "system", "content": "You are a helpful business consultant."},
                     {"role": "user", "content": user_input}
                 ]
             )
             st.success(response.choices[0].message.content.strip())
         except Exception as e:
-            st.error(f"❌ GPT failed: {e}")
+            st.error(f"❌ GPT Analysis failed: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="brand_positioning")
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="brand_positioning".replace("_", " ").title())
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
-        st.warning(f"⚠️ Google Sheets not connected: {e}")
+        st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export PDF"):
+    if st.button("Export to PDF", key="brand_positioning_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Consulting Report")
+        c.drawString(100, 750, f"Report: brand_positioning".replace("_", " ").title())
         y = 735
         for k, v in locals().items():
             if not k.startswith("_"):
@@ -48,3 +43,11 @@ def run():
         c.save()
         buffer.seek(0)
         st.download_button("Download PDF", buffer, file_name="report.pdf")
+
+    # 🧭 Sidebar consulting insights
+    with st.sidebar:
+        st.markdown("## 💡 Guide")
+        st.write(f"This tab helps analyze or build insights for **{'brand_positioning'.replace('_', ' ').title()}**.")
+        st.markdown("- Provide a clear question or topic.")
+        st.markdown("- Click **Run GPT Analysis** to see suggestions.")
+        st.markdown("- Export results or save to your Sheets.")

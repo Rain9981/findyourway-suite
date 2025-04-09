@@ -4,7 +4,7 @@ import os
 
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌍 Branding with spinning globe
+# 🌍 Branding
 st.markdown(
     "<div style='text-align:center;'>"
     "<h1>🌍 Find Your Way Network Marketing Consultants</h1>"
@@ -13,14 +13,9 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# 🧭 Load all subfolders as tabbed apps
-tab_folders = sorted([
-    f for f in os.listdir() if os.path.isdir(f) and not f.startswith(".") and os.path.exists(f"{f}/{f}_app.py")
-])
+# 🔄 Load sidebar dropdown
+tabs = sorted([f for f in os.listdir() if os.path.isdir(f) and not f.startswith(".") and os.path.exists(f"{f}/{f}_app.py")])
+selected = st.sidebar.selectbox("📂 Choose a Tool", tabs)
 
-tabs = st.tabs([f.replace("_", " ").title() for f in tab_folders])
-
-for i, folder in enumerate(tab_folders):
-    with tabs[i]:
-        module = importlib.import_module(f"{folder}.{folder}_app")
-        module.run()
+module = importlib.import_module(f"{selected}.{selected}_app")
+module.run()
