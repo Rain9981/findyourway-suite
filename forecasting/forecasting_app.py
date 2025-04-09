@@ -22,6 +22,7 @@ def run():
         st.info("✅ Data saved to Google Sheets.")
     except:
         st.warning("Google Sheets not connected.")
+        st.error(f"Error: {e}")
 
     if st.button("Export to PDF"):
         buffer = io.BytesIO()
