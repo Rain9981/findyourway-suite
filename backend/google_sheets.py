@@ -15,6 +15,8 @@ def save_data(role, data_dict, sheet_tab="General"):
         worksheet = sheet.worksheet(sheet_tab)
     except:
         worksheet = sheet.add_worksheet(title=sheet_tab, rows="100", cols="20")
+        header = ["Timestamp", "User Role"] + list(data_dict.keys())
+        worksheet.append_row(header)
 
     row = [str(datetime.datetime.now()), role] + [str(v) for v in data_dict.values()]
     worksheet.append_row(row)

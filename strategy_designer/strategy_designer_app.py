@@ -1,38 +1,52 @@
 import streamlit as st
-import pandas as pd
-import openai
+from openai import OpenAI
 import io
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
+from backend.google_sheets import save_data
 
-openai.api_key = st.secrets['openai']['api_key']
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("📐 Strategy Designer")
-    st.markdown("### Draft your business strategy.")
+    st.title("🧩 Strategy Designer")
+    st.markdown("### Map out business goals, obstacles, and tactics.")
 
-    plan = st.text_area("Write your strategic plan")
+    objective = st.text_input("Primary Business Objective")
+    challenge = st.text_area("What are the biggest obstacles?")
+    timeline = st.selectbox("Preferred Timeline", ["1-3 months", "3-6 months", "6-12 months", "1+ year"])
 
-    if st.button("Run GPT Analysis"):
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "Analyze the following input: "},
-                {"role": "user", "content": business_name if 'business_name' in locals() else 'N/A'}
-            ]
-        )
-        st.success(response['choices'][0]['message']['content'].strip())
+    st.sidebar.title("🧠 How to Use")
+    st.sidebar.info("Describe the business goal and challenges. The AI will generate a strategic action plan.")
+
+    if st.button("Generate Strategy"):
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a business strategist helping clients plan effectively."},
+                    {"role": "user", "content": f"Goal: {objective}\nChallenges: {challenge}\nTimeline: {timeline}"}
+                ]
+            )
+            st.success(response.choices[0].message.content.strip())
+        except Exception as e:
+            st.error(f"❌ GPT Strategy failed: {e}")
+
+    try:
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="StrategyDesigner")
+        st.info("✅ Data saved to Google Sheets.")
+    except Exception as e:
+        st.warning(f"Google Sheets not connected. Error: {e}")
 
     if st.button("Export to PDF"):
         buffer = io.BytesIO()
         c = canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Consulting Report")
-        c.drawString(100, 735, "------------------")
-        y = 720
+        y = 750
+        c.drawString(100, y, "Strategy Report")
+        c.drawString(100, y-15, "------------------")
         for k, v in locals().items():
             if not k.startswith("_"):
-                c.drawString(100, y, f"{k}: {v}")
                 y -= 15
+                c.drawString(100, y, f"{k}: {v}")
         c.save()
         buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="report.pdf")
+        st.download_button("Download PDF", buffer, file_name="strategy_report.pdf")
