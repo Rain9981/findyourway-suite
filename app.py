@@ -47,4 +47,8 @@ if not st.session_state["logged_in"]:
 tab_dirs = [d for d in os.listdir() if os.path.isdir(d) and os.path.exists(f"{d}/{d}_app.py")]
 selected = st.sidebar.selectbox("📂 Choose a Tool", sorted(tab_dirs))
 module = importlib.import_module(f"{selected}.{selected}_app")
-module.run()
+if hasattr(module, "run"):
+    module.run()
+else:
+    st.error(f"⚠️ Tab '{selected}' is missing a run() function.")
+
