@@ -8,7 +8,7 @@ from reportlab.lib.pagesizes import letter
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("AI-Enhanced Tool: " + "client_intake".replace("_", " ").title())
+    st.title("AI-Enhanced Tool: " + "marketing_planner".replace("_", " ").title())
     st.markdown("### Use GPT-4o to generate insights.")
 
     user_input = st.text_area("Enter your business question or topic:")
@@ -27,7 +27,7 @@ def run():
             st.error(f"❌ GPT Analysis failed: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="client_intake".replace("_", " ").title())
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="marketing_planner".replace("_", " ").title())
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")

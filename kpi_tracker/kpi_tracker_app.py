@@ -1,21 +1,52 @@
 import streamlit as st
-import pandas as pd
+from openai import OpenAI
+from backend.google_sheets import save_data
+import io
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 
-
-
-
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("📊 KPI Tracker")
-    st.markdown("### Track key performance indicators.")
+    st.title("AI-Enhanced Tool: " + "kpi_tracker".replace("_", " ").title())
+    st.markdown("### Use GPT-4o to generate insights.")
 
-    kpi_name = st.text_input("KPI Name")
-    kpi_value = st.number_input("Current Value", min_value=0, value=0, step=1)
+    user_input = st.text_area("Enter your business question or topic:")
 
-    # Google Sheets saving (optional backend logic)
+    if st.button("Run GPT Analysis") and user_input:
+        try:
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a consulting expert. Help the client with insights."},
+                    {"role": "user", "content": user_input}
+                ]
+            )
+            st.success(response.choices[0].message.content.strip())
+        except Exception as e:
+            st.error(f"❌ GPT Analysis failed: {e}")
+
     try:
-        from backend.google_sheets import save_data
-        save_data(st.session_state.get("user_role", "guest"), locals())
+        save_data(st.session_state.get("user_role", "guest"), locals(), sheet_tab="kpi_tracker".replace("_", " ").title())
         st.info("✅ Data saved to Google Sheets.")
-    except:
-        st.warning("Google Sheets not connected.")
+    except Exception as e:
+        st.warning(f"Google Sheets not connected. Error: {e}")
+
+    if st.button("Export to PDF"):
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
+        y = 750
+        for k, v in locals().items():
+            if not k.startswith("_"):
+                c.drawString(100, y, f"{k}: {v}")
+                y -= 15
+        c.save()
+        buffer.seek(0)
+        st.download_button("Download PDF", buffer, file_name="report.pdf")
+
+    # 🧠 Sidebar Consulting Tips
+    with st.sidebar:
+        st.markdown("## 🧠 Consulting Tips")
+        st.markdown("- Enter a clear business scenario.")
+        st.markdown("- Results saved to Google Sheets.")
+        st.markdown("- Export your insights as a report.")
