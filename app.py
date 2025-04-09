@@ -16,32 +16,28 @@ st.markdown("""
 
 # 🔐 Login with tier access
 if "logged_in" not in st.session_state:
-    st.session_state["logged_in"] = False
-    st.session_state["user_role"] = "guest"
+    st.session_state.logged_in = False
+    st.session_state.user_role = "guest"
 
-if not st.session_state["logged_in"]:
-    st.title("🔐 Login to Find Your Way Suite")
-    username = st.text_input("Username")
-    password = st.text_input("Password", type="password")
+if not st.session_state.logged_in:
+    st.subheader("🔐 Login Required")
+    password = st.text_input("Enter access password:", type="password")
+
+    roles = {
+        "basic": "basic",
+        "elite": "elite",
+        "premium": "premium",
+        "FindYourWayNMC520": "admin"
+    }
+
     if st.button("Login"):
-        if password == "FindYourWayNMC520":
-            st.session_state["logged_in"] = True
-            st.session_state["user_role"] = "admin"
-            st.experimental_rerun()
-        elif password == "elite":
-            st.session_state["logged_in"] = True
-            st.session_state["user_role"] = "elite"
-            st.experimental_rerun()
-        elif password == "premium":
-            st.session_state["logged_in"] = True
-            st.session_state["user_role"] = "premium"
-            st.experimental_rerun()
-        elif password == "basic":
-            st.session_state["logged_in"] = True
-            st.session_state["user_role"] = "basic"
+        if password in roles:
+            st.session_state.logged_in = True
+            st.session_state.user_role = roles[password]
+            st.success(f"✅ Logged in as {st.session_state.user_role.capitalize()}")
             st.experimental_rerun()
         else:
-            st.error("Invalid password")
+            st.error("❌ Incorrect password")
     st.stop()
 
 # 🔍 Sidebar dropdown navigation
