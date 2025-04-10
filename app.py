@@ -4,17 +4,15 @@ import os
 
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌍 Branding Section with Spinning Businessman + Logo
+# 🌟 Branding Section with Logo Only (No GIF)
 st.markdown("""
 <div style='text-align:center;'>
     <h1>🌍 Find Your Way Network Marketing Consultants</h1>
-    <img src='https://i.gifer.com/VAyR.gif' width='100' style='margin-top:10px;' alt='Businessman Spinner'>
-    <br/>
     <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg' width='220' style='margin-top:15px;' alt='Find Your Way Logo'>
 </div>
 """, unsafe_allow_html=True)
 
-# 🔐 Login with Role-Based Access
+# 🔐 Login with Tier-Based Access
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -48,7 +46,7 @@ if not st.session_state["logged_in"]:
 tab_dirs = [d for d in os.listdir() if os.path.isdir(d) and os.path.exists(f"{d}/{d}_app.py")]
 selected = st.sidebar.selectbox("📂 Choose a Tool", sorted(tab_dirs))
 
-# ▶️ Load and Run Selected Tab
+# ▶️ Load Selected Tab
 try:
     module = importlib.import_module(f"{selected}.{selected}_app")
     if hasattr(module, "run"):
