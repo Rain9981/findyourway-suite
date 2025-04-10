@@ -33,10 +33,11 @@ def run():
             st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="oops audit")
-        st.info("✅ Data saved to Google Sheets.")
-    except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
+    save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Oops Audit")
+    st.info("✅ Data saved to Google Sheets.")
+except Exception as e:
+    st.warning(f"Google Sheets not connected. Error: {e}")
+
 
     if st.button("Export to PDF", key="oops_audit_pdf"):
         buffer = io.BytesIO()
