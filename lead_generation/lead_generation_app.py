@@ -1,44 +1,31 @@
-import streamlit as st
-from openai import OpenAI
-from backend.google_sheets import save_data
-import io
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.lib.pagesizes import letter
-
 def run():
-    st.title("lead generation".title() + " Tool")
+    st.title("📣 Lead Generation")
+
     st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.markdown("**What this tab does:** Analyzes your 'lead generation' strategy with AI.")
-    st.sidebar.markdown("**What to input:** Enter a question, scenario, or business insight.")
-    st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
+    st.sidebar.write("**What to enter here:** Your target customer and what you're offering.")
+    st.sidebar.write("**What this tab does:** Generates lead magnet ideas and messaging.")
+    st.sidebar.write("**How to use results:** Use for email copy, ads, landing pages, or sales scripts.")
 
-    prompt = st.text_area("💬 GPT prompt for lead generation", key="lead_generation_input")
+    prompt_label = "Describe your ideal lead and product:"
+    example_prompt = "Example: I sell an online course for freelancers — generate 3 lead magnet ideas."
 
-    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-    if st.button("Run GPT Analysis", key="lead_generation_run") and prompt:
+    user_input = st.text_area(prompt_label, value=example_prompt, key="lead_generation_input")
+
+    if st.button("Run GPT Analysis", key="lead_generation_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a consulting AI specializing in lead generation."},
-                    {"role": "user", "content": prompt}
+                    {"role": "system", "content": "You are a lead generation expert."},
+                    {"role": "user", "content": user_input}
                 ]
             )
             st.success(response.choices[0].message.content.strip())
         except Exception as e:
-            st.error(f"GPT Error: {e}")
+            st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="lead generation")
+        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Lead Generation")
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
-
-    if st.button("Export to PDF", key="lead_generation_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "GPT Analysis for lead generation")
-        c.drawString(100, 735, f"Prompt: {prompt}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="lead_generation_report.pdf")
