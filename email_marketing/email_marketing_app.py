@@ -35,7 +35,7 @@ def run():
             st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="Email Marketing")
+        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="email marketing")
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
