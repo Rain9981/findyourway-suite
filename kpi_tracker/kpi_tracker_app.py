@@ -5,43 +5,59 @@ import io
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
 
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+
 def run():
-    st.title("kpi tracker".title() + " Tool")
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.markdown("**What this tab does:** Analyzes your 'kpi tracker' strategy with AI.")
-    st.sidebar.markdown("**What to input:** Enter a question, scenario, or business insight.")
-    st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
+    st.title("📊 KPI Tracker")
 
-    prompt = st.text_area("💬 GPT prompt for kpi tracker", key="kpi_tracker_input")
-    if st.button("✨ Autofill Suggestion", key="kpi_tracker_fill"):
-        user_input = "Suggest something for kpi tracker"
+    st.sidebar.header("💡 KPI Tracker Guide")
+    st.sidebar.markdown("""
+    **What this tab does:**  
+    Helps you track Key Performance Indicators (KPIs) and optimize metrics.
 
+    **What to input:**  
+    List KPIs you're tracking (sales, churn rate, engagement, etc.) or areas you'd like to improve.
 
-    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-    if st.button("Run GPT Analysis", key="kpi_tracker_run") and prompt:
+    **How to use:**  
+    GPT can recommend benchmarks, insights, or ways to reach targets.
+    """)
+
+    user_input = st.text_area(
+        "Describe the KPIs you're tracking or struggling with:",
+        key="kpi_tracker_input"
+    )
+
+    if st.button("📈 Analyze KPIs", key="kpi_tracker_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a consulting AI specializing in kpi tracker."},
-                    {"role": "user", "content": prompt}
+                    {"role": "system", "content": "You are a KPI expert helping optimize business performance metrics."},
+                    {"role": "user", "content": user_input}
                 ]
             )
             st.success(response.choices[0].message.content.strip())
         except Exception as e:
-            st.error(f"GPT Error: {e}")
+            st.error(f"❌ GPT Error: {e}")
+
+    if st.button("✨ Autofill Sample Prompt", key="kpi_tracker_suggest"):
+        st.session_state["kpi_tracker_input"] = "Our sales KPIs are below target. How can we improve performance next quarter?"
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="kpi tracker")
+        save_data(
+            st.session_state.get("user_role", "guest"),
+            {"input": user_input},
+            sheet_tab="KPI Tracker"
+        )
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export to PDF", key="kpi_tracker_pdf"):
+    if st.button("📄 Export to PDF", key="kpi_tracker_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "GPT Analysis for kpi tracker")
-        c.drawString(100, 735, f"Prompt: {prompt}")
+        c.drawString(100, 750, "KPI Tracker Report")
+        c.drawString(100, 735, f"Input: {user_input}")
         c.save()
         buffer.seek(0)
         st.download_button("Download PDF", buffer, file_name="kpi_tracker_report.pdf")
