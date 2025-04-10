@@ -17,6 +17,9 @@ def run():
     st.sidebar.write("**How to use it:** Use GPT-4o to generate a strategic comparison of your value dimensions.")
 
     user_input = st.text_area("What market or competitors are you comparing?", key="canvas_input")
+    if st.button("✨ Autofill Suggestion", key="canvas_fill"):
+        user_input = "Suggest something for canvas"
+
 
     if st.button("Run GPT-4o Autofill", key="canvas_run") and user_input:
         try:

@@ -17,6 +17,9 @@ def run():
     st.sidebar.write("**How to use it:** Use GPT insights to guide budgeting or strategy.")
 
     user_input = st.text_area("What would you like to forecast? (e.g., Project revenue for next 6 months based on current growth)", key="forecasting_input")
+    if st.button("✨ Autofill Suggestion", key="forecasting_fill"):
+        user_input = "Suggest something for forecasting"
+
 
     if st.button("Run Forecast", key="forecasting_run") and user_input:
         try:

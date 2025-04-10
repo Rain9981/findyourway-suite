@@ -10,6 +10,9 @@ def run():
     example_prompt = "Example: Design a 6-month strategy for entering a new niche market in digital wellness."
 
     user_input = st.text_area(prompt_label, value=example_prompt, key="strategy_designer_input")
+    if st.button("✨ Autofill Suggestion", key="strategy_designer_fill"):
+        user_input = "Suggest something for strategy designer"
+
 
     if st.button("Run GPT Analysis", key="strategy_designer_run") and user_input:
         try:

@@ -10,6 +10,9 @@ def run():
     example_prompt = "Example: Plan a cross-platform launch for a productivity app targeting Gen Z entrepreneurs."
 
     user_input = st.text_area(prompt_label, value=example_prompt, key="marketing_hub_input")
+    if st.button("✨ Autofill Suggestion", key="marketing_hub_fill"):
+        user_input = "Suggest something for marketing hub"
+
 
     if st.button("Run GPT Analysis", key="marketing_hub_run") and user_input:
         try:

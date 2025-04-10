@@ -19,6 +19,9 @@ def run():
 
     # Input prompt tailored to business development
     user_input = st.text_area("What do you need help with? (e.g., How can I grow my client base using strategic partnerships?)", key="business_development_input")
+    if st.button("✨ Autofill Suggestion", key="business_development_fill"):
+        user_input = "Suggest something for business development"
+
 
     if st.button("Run GPT-4o Autofill", key="business_development_run") and user_input:
         try:

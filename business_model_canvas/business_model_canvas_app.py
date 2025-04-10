@@ -17,6 +17,9 @@ def run():
     st.sidebar.write("**How to use it:** Use GPT-4o to draft your canvas or refine it for presentations.")
 
     user_input = st.text_area("What aspect of your business model needs help?", key="business_model_canvas_input")
+    if st.button("✨ Autofill Suggestion", key="business_model_canvas_fill"):
+        user_input = "Suggest something for business model canvas"
+
 
     if st.button("Run GPT-4o Autofill", key="business_model_canvas_run") and user_input:
         try:

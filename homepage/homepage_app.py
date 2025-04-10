@@ -13,6 +13,9 @@ def run():
     st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
 
     prompt = st.text_area("💬 GPT prompt for homepage", key="homepage_input")
+    if st.button("✨ Autofill Suggestion", key="homepage_fill"):
+        user_input = "Suggest something for homepage"
+
 
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     if st.button("Run GPT Analysis", key="homepage_run") and prompt:

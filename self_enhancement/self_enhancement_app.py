@@ -13,6 +13,9 @@ def run():
     st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
 
     prompt = st.text_area("💬 GPT prompt for self enhancement", key="self_enhancement_input")
+    if st.button("✨ Autofill Suggestion", key="self_enhancement_fill"):
+        user_input = "Suggest something for self enhancement"
+
 
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     if st.button("Run GPT Analysis", key="self_enhancement_run") and prompt:

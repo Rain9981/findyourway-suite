@@ -13,6 +13,9 @@ def run():
     st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
 
     prompt = st.text_area("💬 GPT prompt for subscription plans", key="subscription_plans_input")
+    if st.button("✨ Autofill Suggestion", key="subscription_plans_fill"):
+        user_input = "Suggest something for subscription plans"
+
 
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     if st.button("Run GPT Analysis", key="subscription_plans_run") and prompt:

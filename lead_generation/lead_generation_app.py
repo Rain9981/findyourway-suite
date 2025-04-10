@@ -10,6 +10,9 @@ def run():
     example_prompt = "Example: I sell an online course for freelancers — generate 3 lead magnet ideas."
 
     user_input = st.text_area(prompt_label, value=example_prompt, key="lead_generation_input")
+    if st.button("✨ Autofill Suggestion", key="lead_generation_fill"):
+        user_input = "Suggest something for lead generation"
+
 
     if st.button("Run GPT Analysis", key="lead_generation_run") and user_input:
         try:

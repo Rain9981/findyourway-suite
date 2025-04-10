@@ -17,6 +17,9 @@ def run():
     st.sidebar.write("**How to use it:** Store all intake data and use GPT to auto-summarize.")
 
     user_input = st.text_area("Enter new client background or notes", key="client_intake_input")
+    if st.button("✨ Autofill Suggestion", key="client_intake_fill"):
+        user_input = "Suggest something for client intake"
+
 
     if st.button("Summarize Intake", key="client_intake_run") and user_input:
         try:

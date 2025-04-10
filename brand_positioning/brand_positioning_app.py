@@ -18,6 +18,9 @@ def run():
     st.sidebar.write("**How to use it:** Use the GPT-generated insight to build taglines, messaging, or customer profiles.")
 
     user_input = st.text_area("What do you want help with? (e.g., Define my brand for health-conscious Gen Z)", key="brand_positioning_input")
+    if st.button("✨ Autofill Suggestion", key="brand_positioning_fill"):
+        user_input = "Suggest something for brand positioning"
+
 
     if st.button("Run GPT-4o Autofill", key="brand_positioning_run") and user_input:
         try:

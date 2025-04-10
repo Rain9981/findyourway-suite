@@ -13,6 +13,9 @@ def run():
     st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
 
     prompt = st.text_area("💬 GPT prompt for kpi tracker", key="kpi_tracker_input")
+    if st.button("✨ Autofill Suggestion", key="kpi_tracker_fill"):
+        user_input = "Suggest something for kpi tracker"
+
 
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     if st.button("Run GPT Analysis", key="kpi_tracker_run") and prompt:

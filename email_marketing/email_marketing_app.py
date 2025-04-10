@@ -13,6 +13,9 @@ def run():
     st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
 
     prompt = st.text_area("💬 GPT prompt for email marketing", key="email_marketing_input")
+    if st.button("✨ Autofill Suggestion", key="email_marketing_fill"):
+        user_input = "Suggest something for email marketing"
+
 
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     if st.button("Run GPT Analysis", key="email_marketing_run") and prompt:

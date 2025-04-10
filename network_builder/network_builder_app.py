@@ -13,6 +13,9 @@ def run():
     st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
 
     prompt = st.text_area("💬 GPT prompt for network builder", key="network_builder_input")
+    if st.button("✨ Autofill Suggestion", key="network_builder_fill"):
+        user_input = "Suggest something for network builder"
+
 
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     if st.button("Run GPT Analysis", key="network_builder_run") and prompt:
