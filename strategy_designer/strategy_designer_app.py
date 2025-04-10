@@ -17,7 +17,11 @@ def run():
     st.sidebar.write("**How to use it:** Use suggestions to plan your strategic moves.")
 
     example_prompt = "Design a strategy to expand into new markets for a SaaS platform."
-    user_input = st.text_area("Enter a strategic question or idea:", value=example_prompt, key="strategy_designer_input")
+    user_input = st.text_area(
+        "Enter a strategic question or idea:",
+        value=example_prompt,
+        key="strategy_designer_input"
+    )
 
     if st.button("Generate Strategy", key="strategy_designer_run") and user_input:
         try:
@@ -50,3 +54,4 @@ def run():
         c.save()
         buffer.seek(0)
         st.download_button("Download PDF", buffer, file_name="strategy_designer_report.pdf")
+
