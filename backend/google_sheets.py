@@ -13,14 +13,14 @@ def save_data(role, data_dict, sheet_tab="General"):
 
     try:
         worksheet = sheet.worksheet(sheet_tab)
-    except:
+    except gspread.exceptions.WorksheetNotFound:
         worksheet = sheet.add_worksheet(title=sheet_tab, rows="100", cols="20")
 
-    # Write headers if sheet is new or empty
+    # Only write headers if the sheet is empty
     if not worksheet.get_all_values():
         headers = ["Timestamp", "Role"] + list(data_dict.keys())
         worksheet.append_row(headers)
 
-    # Append data
+    # Append new row of data
     row = [str(datetime.datetime.now()), role] + [str(v) for v in data_dict.values()]
     worksheet.append_row(row)
