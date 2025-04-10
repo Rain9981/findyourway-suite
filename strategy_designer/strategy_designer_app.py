@@ -12,9 +12,11 @@ def run():
     st.markdown("### Craft business strategies using GPT insight.")
 
     st.sidebar.header("💡 Strategy Designer Guide")
-    st.sidebar.write("**What this tab does:** Helps you define and design growth strategies.")
-    st.sidebar.write("**What to enter:** Business scenario, goals, or market challenges.")
-    st.sidebar.write("**How to use it:** Use suggestions to plan your strategic moves.")
+    st.sidebar.markdown("""
+    - **What this tab does:** Helps you define and design growth strategies.
+    - **What to enter:** Business scenario, goals, or market challenges.
+    - **How to use it:** Use suggestions to plan your strategic moves.
+    """)
 
     example_prompt = "Design a strategy to expand into new markets for a SaaS platform."
     user_input = st.text_area(
