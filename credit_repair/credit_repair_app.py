@@ -13,4 +13,3 @@ def run():
     st.markdown("### Start Your Credit Journey")
     st.markdown("Click below to access your credit repair tools.")
     st.link_button("Go to Credit Repair Platform", "https://findyourwaynmc.creditmyreport.com")
-df")

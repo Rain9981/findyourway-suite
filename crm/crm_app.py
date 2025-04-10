@@ -12,4 +12,3 @@ def run():
 
     st.markdown("This tab will soon connect to your full CRM database.")
     st.warning("🔧 Under construction: Live CRM data tracking coming soon.")
-pdf")
