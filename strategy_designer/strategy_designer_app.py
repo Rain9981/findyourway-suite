@@ -33,7 +33,11 @@ def run():
             st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Strategy Designer")
+        save_data(
+            st.session_state.get("user_role", "guest"),
+            {"input": user_input},
+            sheet_tab="Strategy Designer"
+        )
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
