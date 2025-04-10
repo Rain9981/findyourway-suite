@@ -1,47 +1,23 @@
 import streamlit as st
-from openai import OpenAI
-from backend.google_sheets import save_data
-import io
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.lib.pagesizes import letter
 
 def run():
-    st.title("homepage".title() + " Tool")
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.markdown("**What this tab does:** Analyzes your 'homepage' strategy with AI.")
-    st.sidebar.markdown("**What to input:** Enter a question, scenario, or business insight.")
-    st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
+    st.title("🏠 Welcome to Your Consulting Suite")
+    st.markdown("""
+    ### 👋 Hello and welcome!
 
-    prompt = st.text_area("💬 GPT prompt for homepage", key="homepage_input")
-    if st.button("✨ Autofill Suggestion", key="homepage_fill"):
-        user_input = "Suggest something for homepage"
+    This is your personalized AI-powered consulting dashboard for strategy, marketing, growth, and business development.
 
+    #### 🔑 What you can do here:
+    - Use AI tools to generate insights, strategy, and messaging.
+    - Save all activity to Google Sheets.
+    - Export consulting reports to PDF.
+    - Access tabs based on your subscription tier.
 
-    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-    if st.button("Run GPT Analysis", key="homepage_run") and prompt:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a consulting AI specializing in homepage."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            st.success(response.choices[0].message.content.strip())
-        except Exception as e:
-            st.error(f"GPT Error: {e}")
+    #### 📋 Quick Start Checklist:
+    1. Start with **Client Intake** or **Brand Positioning**.
+    2. Use GPT to generate ideas or complete forms.
+    3. Save your work (auto-saves if connected).
+    4. Export PDFs for your clients or team.
+    """)
 
-    try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="homepage")
-        st.info("✅ Data saved to Google Sheets.")
-    except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
-
-    if st.button("Export to PDF", key="homepage_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "GPT Analysis for homepage")
-        c.drawString(100, 735, f"Prompt: {prompt}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="homepage_report.pdf")
+    st.success("✅ You're logged in and ready to begin.")
