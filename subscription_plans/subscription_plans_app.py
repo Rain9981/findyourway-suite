@@ -1,47 +1,38 @@
 import streamlit as st
-from openai import OpenAI
-from backend.google_sheets import save_data
-import io
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.lib.pagesizes import letter
 
 def run():
-    st.title("subscription plans".title() + " Tool")
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.markdown("**What this tab does:** Analyzes your 'subscription plans' strategy with AI.")
-    st.sidebar.markdown("**What to input:** Enter a question, scenario, or business insight.")
-    st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
+    st.title("💼 Subscription Plans Overview")
 
-    prompt = st.text_area("💬 GPT prompt for subscription plans", key="subscription_plans_input")
-    if st.button("✨ Autofill Suggestion", key="subscription_plans_fill"):
-        user_input = "Suggest something for subscription plans"
+    st.sidebar.header("💡 Subscription Plans Guide")
+    st.sidebar.markdown("""
+    - **What this tab does:** Shows the features and pricing for each subscription level.
+    - **What to input:** Nothing. This tab is static and shows the plan details.
+    - **How to use:** Compare plan levels and use in sales pages or onboarding.
+    """)
 
+    st.markdown("## 📦 Plan Levels")
 
-    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-    if st.button("Run GPT Analysis", key="subscription_plans_run") and prompt:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a consulting AI specializing in subscription plans."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            st.success(response.choices[0].message.content.strip())
-        except Exception as e:
-            st.error(f"GPT Error: {e}")
+    st.success("""
+    **🟢 Basic – $19.99/month**
+    - Branding Tools  
+    - Forecasting  
+    - Strategic Guidance  
 
-    try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="subscription plans")
-        st.info("✅ Data saved to Google Sheets.")
-    except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
+    **🔵 Elite – $49.99/month**
+    - Everything in Basic  
+    - CRM Dashboard  
+    - Lead Generation  
+    - Marketing Planner  
+    - Business Model Canvas  
 
-    if st.button("Export to PDF", key="subscription_plans_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "GPT Analysis for subscription plans")
-        c.drawString(100, 735, f"Prompt: {prompt}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="subscription_plans_report.pdf")
+    **🟣 Premium – $99.99/month**
+    - Everything in Elite  
+    - Full Suite Access  
+    - GPT Autofill + PDF Export  
+    - Data Save to Google Sheets  
+
+    **🔐 Admin**
+    - All Access  
+    - Export CRM / Reports  
+    - Edit Plans / View Client Data  
+    """)
