@@ -5,40 +5,43 @@ import io
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
 
+client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+
 def run():
-    st.title("forecasting".title() + " Tool")
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.markdown("**What this tab does:** Analyzes your 'forecasting' strategy with AI.")
-    st.sidebar.markdown("**What to input:** Enter a question, scenario, or business insight.")
-    st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
+    st.title("📈 Business Forecasting")
+    st.markdown("### Use AI to project future trends, sales, or market growth.")
 
-    prompt = st.text_area("💬 GPT prompt for forecasting", key="forecasting_input")
+    st.sidebar.header("💡 Forecasting Guide")
+    st.sidebar.write("**What this tab does:** Projects revenue, growth, or customer base.")
+    st.sidebar.write("**What to enter:** Product/service, time frame, market trends.")
+    st.sidebar.write("**How to use it:** Use GPT insights to guide budgeting or strategy.")
 
-    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-    if st.button("Run GPT Analysis", key="forecasting_run") and prompt:
+    user_input = st.text_area("What would you like to forecast? (e.g., Project revenue for next 6 months based on current growth)", key="forecasting_input")
+
+    if st.button("Run Forecast", key="forecasting_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a consulting AI specializing in forecasting."},
-                    {"role": "user", "content": prompt}
+                    {"role": "system", "content": "You are a business analyst skilled at forecasting."},
+                    {"role": "user", "content": user_input}
                 ]
             )
             st.success(response.choices[0].message.content.strip())
         except Exception as e:
-            st.error(f"GPT Error: {e}")
+            st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="forecasting")
+        save_data(st.session_state.get("user_role", "guest"), {"forecast_input": user_input}, sheet_tab="Forecasting")
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export to PDF", key="forecasting_pdf"):
+    if st.button("Export Forecast PDF", key="forecasting_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "GPT Analysis for forecasting")
-        c.drawString(100, 735, f"Prompt: {prompt}")
+        c.drawString(100, 750, "Forecast Report")
+        c.drawString(100, 735, f"Input: {user_input}")
         c.save()
         buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="forecasting_report.pdf")
+        st.download_button("Download PDF", buffer, file_name="forecast_report.pdf")
