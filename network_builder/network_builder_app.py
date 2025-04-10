@@ -45,9 +45,9 @@ def run():
         sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
 
         try:
-            worksheet = sheet.worksheet("Network Builder")
+            worksheet = sheet.worksheet("network builder")
         except WorksheetNotFound:
-            worksheet = sheet.add_worksheet(title="Network Builder", rows="100", cols="20")
+            worksheet = sheet.add_worksheet(title="network builder", rows="100", cols="20")
 
         if not worksheet.get_all_values():
             worksheet.append_row(["Timestamp", "User Role", "Input"])
