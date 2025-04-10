@@ -12,9 +12,9 @@
         sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
 
         try:
-            worksheet = sheet.worksheet("Strategic Simulator")
+            worksheet = sheet.worksheet("strategic simulator")
         except WorksheetNotFound:
-            worksheet = sheet.add_worksheet(title="Strategic Simulator", rows="100", cols="20")
+            worksheet = sheet.add_worksheet(title="strategic simulator", rows="100", cols="20")
 
         if not worksheet.get_all_values():
             worksheet.append_row(["Timestamp", "User Role", "Input"])
