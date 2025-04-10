@@ -4,27 +4,26 @@ from backend.google_sheets import save_data
 import io
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-import datetime
 
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("🚧 Oops Audit")
-    st.markdown("### Spot mistakes and inefficiencies in your business.")
+    st.title("🚨 Oops Audit")
+    st.markdown("### Identify overlooked issues or past mistakes.")
 
     st.sidebar.header("💡 Oops Audit Guide")
-    st.sidebar.write("**What this tab does:** Reviews a business process or decision to catch mistakes.")
-    st.sidebar.write("**What to enter:** Describe something that went wrong or needs review.")
-    st.sidebar.write("**How to use:** Get GPT analysis to find weak spots and prevent future errors.")
+    st.sidebar.write("**What this tab does:** Helps you analyze past business decisions or internal mistakes.")
+    st.sidebar.write("**What to enter:** Describe a decision, event, or area where something went wrong.")
+    st.sidebar.write("**How to use it:** GPT suggests lessons, fixes, or prevention ideas.")
 
-    user_input = st.text_area("Describe the issue, decision, or workflow to audit:", key="oops_audit_input")
+    user_input = st.text_area("What mistake or issue would you like to analyze?", key="oops_audit_input")
 
-    if st.button("Run Audit", key="oops_audit_run") and user_input:
+    if st.button("Analyze Mistake", key="oops_audit_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You're an expert at identifying business mistakes and risks."},
+                    {"role": "system", "content": "You are a business consultant identifying lessons from past mistakes."},
                     {"role": "user", "content": user_input}
                 ]
             )
@@ -33,11 +32,14 @@ def run():
             st.error(f"❌ GPT Error: {e}")
 
     try:
-    save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Oops Audit")
-    st.info("✅ Data saved to Google Sheets.")
-except Exception as e:
-    st.warning(f"Google Sheets not connected. Error: {e}")
-
+        save_data(
+            st.session_state.get("user_role", "guest"),
+            {"input": user_input},
+            sheet_tab="Oops Audit"
+        )
+        st.info("✅ Data saved to Google Sheets.")
+    except Exception as e:
+        st.warning(f"Google Sheets not connected. Error: {e}")
 
     if st.button("Export to PDF", key="oops_audit_pdf"):
         buffer = io.BytesIO()
