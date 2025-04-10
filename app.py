@@ -4,16 +4,17 @@ import os
 
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🧑‍💼 Branding with businessman spinner + logo
+# ✅ Branding with hosted globe and logo
 st.markdown("""
 <div style='text-align:center;'>
     <h1>🌍 Find Your Way Network Marketing Consultants</h1>
-    <img src='https://i.gifer.com/VAyR.gif' width='100'><br/>
-    <img src='https://findyourwaynmc.wixsite.com/my-site/_files/ugd/2bd6a2_0a1d305fc8e24ab5b9e26ea5e8f15f60~mv2.png' width='140' style='margin-top:10px;'>
+    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/globe.gif' width='100' style='margin-top:10px;' alt='Spinning Globe'>
+    <br/>
+    <img src='https://findyourway-suite-jglcfcdtomhg8wedv3pkqn.streamlit.app/logo.png' width='200' style='margin-top:15px;' alt='Find Your Way Logo'>
 </div>
 """, unsafe_allow_html=True)
 
-# 🔐 Login screen
+# 🔐 Login logic with tier access
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -26,29 +27,27 @@ if not st.session_state["logged_in"]:
         if password == "FindYourWayNMC520":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "admin"
-            st.rerun()
         elif password == "premium":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "premium"
-            st.rerun()
         elif password == "elite":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "elite"
-            st.rerun()
         elif password == "basic":
             st.session_state["logged_in"] = True
             st.session_state["user_role"] = "basic"
-            st.rerun()
         else:
             st.error("Invalid login")
+        st.rerun()
     st.stop()
 
-# ✅ Sidebar tab selector
+# ✅ Sidebar for choosing tool
 tab_dirs = [d for d in os.listdir() if os.path.isdir(d) and os.path.exists(f"{d}/{d}_app.py")]
 selected = st.sidebar.selectbox("📂 Choose a Tool", sorted(tab_dirs))
+
+# ✅ Dynamic tab loading
 module = importlib.import_module(f"{selected}.{selected}_app")
 if hasattr(module, "run"):
     module.run()
 else:
     st.error(f"⚠️ Tab '{selected}' is missing a run() function.")
-
