@@ -1,13 +1,18 @@
+import streamlit as st
+
 def run():
     st.title("📣 Lead Generation")
 
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.write("**What to enter here:** Your target customer and what you're offering.")
-    st.sidebar.write("**What this tab does:** Generates lead magnet ideas and messaging.")
-    st.sidebar.write("**How to use results:** Use for email copy, ads, landing pages, or sales scripts.")
+    st.sidebar.header("💡 Lead Gen Guide")
+    st.sidebar.markdown("""
+    - **Purpose:** Generate new lead capture ideas.
+    - **What to input:** Your product/service and target audience.
+    - **Use this to:** Get lead magnet and outreach suggestions.
+    """)
 
-    prompt_label = "Describe your ideal lead and product:"
-    example_prompt = "Example: I sell an online course for freelancers — generate 3 lead magnet ideas."
+    prompt = st.text_area("What’s your target market or offer?")
+    if st.button("Generate Lead Strategy"):
+        st.success(f"📈 Try this lead gen idea: {prompt}")
 
     user_input = st.text_area(prompt_label, value=example_prompt, key="lead_generation_input")
     if st.button("✨ Autofill Suggestion", key="lead_generation_fill"):

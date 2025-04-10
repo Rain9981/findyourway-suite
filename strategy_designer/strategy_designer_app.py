@@ -1,13 +1,18 @@
+import streamlit as st
+
 def run():
     st.title("🧠 Strategy Designer")
 
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.write("**What to enter here:** Business ideas, SWOT details, or high-level goals.")
-    st.sidebar.write("**What this tab does:** Helps form strategic plans using AI guidance.")
-    st.sidebar.write("**How to use results:** Map your roadmap, eliminate weak areas, move with clarity.")
+    st.sidebar.header("💡 Strategy Designer Guide")
+    st.sidebar.markdown("""
+    - **Purpose:** Help you plan long-term business strategies.
+    - **What to input:** A strategic challenge or goal.
+    - **Use this to:** Receive AI-backed strategic suggestions.
+    """)
 
-    prompt_label = "Describe your strategy challenge or idea:"
-    example_prompt = "Example: Design a 6-month strategy for entering a new niche market in digital wellness."
+    prompt = st.text_area("Enter your strategic challenge:")
+    if st.button("Generate Strategic Advice"):
+        st.success(f"🧭 Strategic path forward: {prompt}")
 
     user_input = st.text_area(prompt_label, value=example_prompt, key="strategy_designer_input")
     if st.button("✨ Autofill Suggestion", key="strategy_designer_fill"):

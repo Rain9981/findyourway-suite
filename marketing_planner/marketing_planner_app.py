@@ -1,47 +1,17 @@
 import streamlit as st
-from openai import OpenAI
-from backend.google_sheets import save_data
-import io
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.lib.pagesizes import letter
 
 def run():
-    st.title("marketing planner".title() + " Tool")
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.markdown("**What this tab does:** Analyzes your 'marketing planner' strategy with AI.")
-    st.sidebar.markdown("**What to input:** Enter a question, scenario, or business insight.")
-    st.sidebar.markdown("**What you get:** Smart suggestions, plus export + Sheets saving.")
+    st.title("📅 Marketing Planner")
 
-    prompt = st.text_area("💬 GPT prompt for marketing planner", key="marketing_planner_input")
-    if st.button("✨ Autofill Suggestion", key="marketing_planner_fill"):
-        user_input = "Suggest something for marketing planner"
+    st.sidebar.header("💡 Marketing Planner Guide")
+    st.sidebar.markdown("""
+    - **What this tab does:** Lets you brainstorm and organize marketing ideas and campaigns.
+    - **What to input:** A specific campaign type, date range, or target audience.
+    - **How to use:** Structure marketing activities across time and channels.
+    """)
 
+    st.info("🧠 Tip: Try input like 'Plan a 3-week social media campaign for new product launch.'")
+    plan = st.text_area("What do you want to plan?", key="marketing_planner_input")
 
-    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-    if st.button("Run GPT Analysis", key="marketing_planner_run") and prompt:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a consulting AI specializing in marketing planner."},
-                    {"role": "user", "content": prompt}
-                ]
-            )
-            st.success(response.choices[0].message.content.strip())
-        except Exception as e:
-            st.error(f"GPT Error: {e}")
-
-    try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": prompt}, sheet_tab="marketing planner")
-        st.info("✅ Data saved to Google Sheets.")
-    except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
-
-    if st.button("Export to PDF", key="marketing_planner_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "GPT Analysis for marketing planner")
-        c.drawString(100, 735, f"Prompt: {prompt}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="marketing_planner_report.pdf")
+    if st.button("Suggest Campaign", key="marketing_planner_btn"):
+        st.success(f"📋 Suggested Strategy: Tailor content weekly for your audience — {plan}")

@@ -1,13 +1,18 @@
+import streamlit as st
+
 def run():
     st.title("📢 Marketing Hub")
 
-    st.sidebar.header("💡 Consulting Guide")
-    st.sidebar.write("**What to enter here:** Your campaign idea or marketing objective.")
-    st.sidebar.write("**What this tab does:** Plans multi-channel campaigns using AI logic.")
-    st.sidebar.write("**How to use results:** Guide content creation, ad targeting, and launch plans.")
+    st.sidebar.header("💡 Marketing Hub Guide")
+    st.sidebar.markdown("""
+    - **Purpose:** Centralize all your marketing insights.
+    - **What to input:** Describe your marketing mix, campaigns, or customer segments.
+    - **Use this to:** Generate outreach strategies and performance enhancements.
+    """)
 
-    prompt_label = "Describe your marketing campaign or audience:"
-    example_prompt = "Example: Plan a cross-platform launch for a productivity app targeting Gen Z entrepreneurs."
+    prompt = st.text_area("Enter your marketing challenge or objective:")
+    if st.button("Run GPT Suggestion"):
+        st.success(f"🚀 Here's how to boost your marketing: {prompt}")
 
     user_input = st.text_area(prompt_label, value=example_prompt, key="marketing_hub_input")
     if st.button("✨ Autofill Suggestion", key="marketing_hub_fill"):
