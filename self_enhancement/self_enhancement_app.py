@@ -23,15 +23,18 @@ def run():
     - **How to use:** Use GPT to brainstorm self-enhancement plans, export your ideas, or save to Sheets.
     """)
 
-    default_prompt = "I want to improve my time management and confidence."
-    user_input = st.text_area(
-        "What aspect of your personal or professional self are you improving?",
-        value=default_prompt,
-        key="self_enhancement_input"
-    )
+   default_prompt = "I want to improve my time management and confidence."
 
-    if st.button("✨ Autofill Suggestion", key="self_enhancement_autofill"):
-        st.session_state["self_enhancement_input"] = default_prompt
+# ✨ Handle autofill BEFORE rendering the text area
+if st.button("✨ Autofill Suggestion", key="self_enhancement_autofill"):
+    st.session_state["self_enhancement_input"] = default_prompt
+
+user_input = st.text_area(
+    "What aspect of your personal or professional self are you improving?",
+    value=st.session_state.get("self_enhancement_input", default_prompt),
+    key="self_enhancement_input"
+)
+
 
 
     if st.button("🚀 Run GPT-4o Autofill", key="self_enhancement_run") and user_input:
