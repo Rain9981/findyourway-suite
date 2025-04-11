@@ -25,7 +25,7 @@ def run():
 
    default_prompt = "I want to improve my time management and confidence."
 
-# ✨ Handle autofill BEFORE rendering the text area
+# ✨ Autofill button logic FIRST
 if st.button("✨ Autofill Suggestion", key="self_enhancement_autofill"):
     st.session_state["self_enhancement_input"] = default_prompt
 
@@ -35,52 +35,55 @@ user_input = st.text_area(
     key="self_enhancement_input"
 )
 
-
-
-    if st.button("🚀 Run GPT-4o Autofill", key="self_enhancement_run") and user_input:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You're a personal development coach helping someone enhance their mindset, skills, or habits."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-            st.success(response.choices[0].message.content.strip())
-        except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
-
-    # ✅ Google Sheets Save Logic (safe from duplicate tab error)
+# 🚀 GPT-4o Analysis
+if st.button("🚀 Run GPT-4o Autofill", key="self_enhancement_run") and user_input:
     try:
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-        creds = json.loads(st.secrets["google_sheets"]["service_account"])
-        credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
-        client_gsheets = gspread.authorize(credentials)
-        sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
-
-        try:
-            worksheet = sheet.worksheet("Self Enhancement")
-        except WorksheetNotFound:
-            worksheet = sheet.add_worksheet(title="Self Enhancement", rows="100", cols="20")
-
-        if not worksheet.get_all_values():
-            worksheet.append_row(["Timestamp", "User Role", "Input"])
-
-        worksheet.append_row([
-            str(datetime.datetime.now()),
-            st.session_state.get("user_role", "guest"),
-            user_input
-        ])
-        st.info("✅ Data saved to Google Sheets.")
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You're a personal development coach helping someone enhance their mindset, skills, or habits."
+                },
+                {"role": "user", "content": user_input}
+            ]
+        )
+        st.success(response.choices[0].message.content.strip())
     except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
+        st.error(f"❌ GPT Error: {e}")
 
-    # 🧾 PDF Export
-    if st.button("📄 Export to PDF", key="self_enhancement_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Self Enhancement Report")
-        c.drawString(100, 735, f"Input: {user_input}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="self_enhancement_report.pdf")
+# ✅ Google Sheets Saving
+try:
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = json.loads(st.secrets["google_sheets"]["service_account"])
+    credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
+    client_gsheets = gspread.authorize(credentials)
+    sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
+
+    try:
+        worksheet = sheet.worksheet("Self Enhancement")
+    except WorksheetNotFound:
+        worksheet = sheet.add_worksheet(title="Self Enhancement", rows="100", cols="20")
+
+    if not worksheet.get_all_values():
+        worksheet.append_row(["Timestamp", "User Role", "Input"])
+
+    worksheet.append_row([
+        str(datetime.datetime.now()),
+        st.session_state.get("user_role", "guest"),
+        user_input
+    ])
+    st.info("✅ Data saved to Google Sheets.")
+except Exception as e:
+    st.warning(f"Google Sheets not connected. Error: {e}")
+
+# 🧾 PDF Export
+if st.button("📄 Export to PDF", key="self_enhancement_pdf"):
+    buffer = io.BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=letter)
+    c.drawString(100, 750, "Self Enhancement Report")
+    c.drawString(100, 735, f"Input: {user_input}")
+    c.save()
+    buffer.seek(0)
+    st.download_button("Download PDF", buffer, file_name="self_enhancement_report.pdf")
+
