@@ -4,27 +4,26 @@ from backend.google_sheets import save_data
 import io
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-import datetime
 
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("🧘 Self-Enhancement")
-    st.markdown("### Improve your mindset, habits, or leadership skills.")
+    st.title("🌱 Self Enhancement")
+    st.markdown("### Explore ways to grow your personal and professional self.")
 
-    st.sidebar.header("💡 Self-Enhancement Guide")
-    st.sidebar.write("**What this tab does:** Helps boost mindset, leadership, or productivity.")
-    st.sidebar.write("**What to enter:** Describe a challenge, habit, or leadership goal.")
-    st.sidebar.write("**How to use:** Use the advice to build better business discipline or mindset.")
+    st.sidebar.header("💡 Self Enhancement Guide")
+    st.sidebar.write("**What this tab does:** Suggests ideas for personal growth and self-improvement.")
+    st.sidebar.write("**What to enter:** Goals, habits, mindset shifts, or growth challenges.")
+    st.sidebar.write("**How to use:** Use GPT to brainstorm self-enhancement plans.")
 
-    user_input = st.text_area("Describe your self-growth challenge or goal:", key="self_enhancement_input")
+    user_input = st.text_area("What aspect of your personal or professional self are you improving?", key="self_enhancement_input")
 
-    if st.button("Get Personal Growth Insight", key="self_enhancement_run") and user_input:
+    if st.button("Suggest Growth Plan", key="self_enhancement_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a mindset coach helping entrepreneurs grow personally."},
+                    {"role": "system", "content": "You're a coach helping someone build their personal and professional growth."},
                     {"role": "user", "content": user_input}
                 ]
             )
@@ -33,7 +32,11 @@ def run():
             st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="self enhancement")
+        save_data(
+            st.session_state.get("user_role", "guest"),
+            {"input": user_input},
+            sheet_tab="Self Enhancement"
+        )
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
