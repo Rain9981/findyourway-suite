@@ -31,7 +31,8 @@ def run():
     )
 
     if st.button("✨ Autofill Suggestion", key="self_enhancement_autofill"):
-        st.session_state.self_enhancement_input = default_prompt
+        st.session_state["self_enhancement_input"] = default_prompt
+
 
     if st.button("🚀 Run GPT-4o Autofill", key="self_enhancement_run") and user_input:
         try:
