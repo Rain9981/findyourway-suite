@@ -65,4 +65,10 @@ def run():
             c.drawString(100, 750, "Consulting Session Report")
             c.drawString(100, 730, f"Date: {datetime.date.today().strftime('%B %d, %Y')}")
             c.drawString(100, 710, "Completed Steps:")
-            text = c.beginText(100, 695
+            text = c.beginText(100, 695)
+            for step in completed:
+                text.textLine(f"✔ {step}")
+            c.drawText(text)
+            c.save()
+            buffer.seek(0)
+            st.download_button("Download PDF", buffer, file_name="consulting_session.pdf")
