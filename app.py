@@ -5,32 +5,26 @@ import os
 # ✅ Page Setup
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌍 Branded Header with Logo, Globe, and Title
+# 🌍 Final Branded Header (Logo + Title + Optional Globe)
 st.markdown("""
 <div style='text-align:center; padding-bottom:20px;'>
-
     <!-- Logo -->
     <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg'
-         width='200'
-         style='margin-bottom:10px;'
-         alt='Find Your Way Logo'>
+         width='200' style='margin-bottom:10px;' alt='Find Your Way Logo'>
 
-    <!-- Title with Globe -->
-    <div style='display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 5px;'>
-        <h1 style='color:#800020; font-size: 40px; font-weight: bold; margin: 0;'>Find Your Way</h1>
-        <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Blue_Marble_2001.png/300px-Blue_Marble_2001.png'
-             width='40'
-             alt='Satellite Globe'
-             style='margin-top:4px;' />
-    </div>
+    <!-- Title -->
+    <h1 style='color:#800020; font-size: 40px; font-weight: bold; margin-bottom: 5px;'>Find Your Way</h1>
 
     <!-- Subtitle -->
-    <p style='font-size:18px; color:#000000; font-weight:300; margin-top:5px;'>Network Marketing Consultants</p>
+    <p style='font-size:18px; color:#000000; font-weight:300; margin-top:0;'>Network Marketing Consultants</p>
 
+    <!-- Optional Globe -->
+    <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Blue_Marble_2001.png/300px-Blue_Marble_2001.png'
+         width='60' alt='Globe' style='margin-top:10px;' />
 </div>
 """, unsafe_allow_html=True)
 
-# 🔐 Login Logic
+# 🔐 Login Setup
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -60,10 +54,10 @@ if not st.session_state["logged_in"]:
             st.error("Invalid login")
     st.stop()
 
-# ✅ Sidebar: Display Role
+# ✅ Sidebar Role Display
 st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
 
-# ✅ Tab Order (Consulting Flow)
+# ✅ Tab Navigation (Ordered Consulting Flow)
 tab_order = [
     "homepage", "client_intake", "subscription_plans", "consulting_guide",
     "brand_positioning", "business_development", "lead_generation", "marketing_hub",
@@ -73,11 +67,11 @@ tab_order = [
     "canvas", "oops_audit"
 ]
 
-# ✅ Show Only Existing Tabs
+# Show only tabs that exist
 available_tabs = [tab for tab in tab_order if os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
 selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
 
-# ▶️ Load Selected Module
+# ▶️ Load and Run Selected Tool
 try:
     module = importlib.import_module(f"{selected}.{selected}_app")
     if hasattr(module, "run"):
