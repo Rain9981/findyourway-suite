@@ -5,15 +5,17 @@ import os
 # ✅ Page Setup
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌍 Header: Title + Subtitle + Globe
+# ✅ Branded Header (Centered Title, Subtitle, and Globe)
 st.markdown("""
 <div style='text-align:center; padding-bottom:20px;'>
-    <h1 style='color:#800020; font-size: 40px; font-weight: bold; margin-bottom: 5px;'>Find Your Way</h1>
 
-    <p style='font-size:18px; color:#000000; font-weight:300; margin-top:0;'>Network Marketing Consultants</p>
+    <h1 style='color:#800020; font-size: 44px; font-weight: bold; margin-bottom: 8px;'>Find Your Way</h1>
+
+    <p style='font-size:20px; color:#000000; font-weight:300; margin-top:0;'>Network Marketing Consultants</p>
 
     <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Blue_Marble_2001.png/300px-Blue_Marble_2001.png'
-         width='60' alt='Globe' style='margin-top:10px;' />
+         width='65' alt='Satellite Globe' style='margin-top:10px;' />
+
 </div>
 """, unsafe_allow_html=True)
 
@@ -47,10 +49,10 @@ if not st.session_state["logged_in"]:
             st.error("Invalid login")
     st.stop()
 
-# ✅ Sidebar: Show Role
+# ✅ Sidebar Role Display
 st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
 
-# ✅ Tab Navigation
+# ✅ Tab Navigation Order
 tab_order = [
     "homepage", "client_intake", "subscription_plans", "consulting_guide",
     "brand_positioning", "business_development", "lead_generation", "marketing_hub",
