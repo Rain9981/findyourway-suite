@@ -1,9 +1,6 @@
 import streamlit as st
 import datetime
 
-# ✅ Set this BEFORE anything else
-st.set_page_config(page_title="Welcome | Find Your Way Suite", layout="centered")
-
 def run():
     st.title("🌐 Welcome to Find Your Way AI Consulting Suite")
 
