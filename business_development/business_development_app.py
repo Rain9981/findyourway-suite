@@ -1,54 +1,72 @@
-import streamlit as st
-from openai import OpenAI
-from backend.google_sheets import save_data
-import io
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.lib.pagesizes import letter
-
-client = OpenAI(api_key=st.secrets["openai"]["api_key"])
-
 def run():
-    st.title("📈 Business Development")
-    st.markdown("### Unlock strategies to grow partnerships, revenue, and market reach.")
+    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+    st.title("🏗️ Business Development")
+    st.markdown("Identify partnership, expansion, and growth opportunities.")
 
-    # Sidebar Consulting Guide
-    st.sidebar.header("💼 Business Development Guide")
-    st.sidebar.write("**What this tab does:** Helps uncover sales strategies, expansion plans, and growth tactics.")
-    st.sidebar.write("**What to enter:** A question or topic about scaling your business, sales, or partnerships.")
-    st.sidebar.write("**How to use it:** Review GPT’s advice to build out development plans, outreach funnels, or partnership models.")
+    st.sidebar.header("💡 Biz Dev Guide")
+    st.sidebar.markdown("""
+    - Describe your current growth goal or new market you're exploring.
+    - GPT will help you brainstorm smart strategies.
+    """)
 
-    # Input prompt tailored to business development
-    user_input = st.text_area("What do you need help with? (e.g., How can I grow my client base using strategic partnerships?)", key="business_development_input")
-    if st.button("✨ Autofill Suggestion", key="business_development_fill"):
-        user_input = "Suggest something for business development"
+    default_prompt = "We want to partner with fitness brands to cross-promote our meal plan app."
 
+    if "business_dev_autofill_triggered" not in st.session_state:
+        st.session_state["business_dev_autofill_triggered"] = False
 
-    if st.button("Run GPT-4o Autofill", key="business_development_run") and user_input:
+    if st.button("✨ Autofill Example", key="business_dev_autofill"):
+        st.session_state["business_dev_autofill_triggered"] = True
+
+    input_value = default_prompt if st.session_state["business_dev_autofill_triggered"] else ""
+
+    user_input = st.text_area("Describe your growth idea or partnership goal:", value=input_value, key="business_dev_input")
+
+    if st.button("🚀 Run GPT-4o Strategy", key="business_dev_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a business strategist helping improve sales, growth, and development pipelines."},
+                    {"role": "system", "content": "You're a business strategist. Help refine this growth or partnership idea."},
                     {"role": "user", "content": user_input}
                 ]
             )
-            st.success(response.choices[0].message.content.strip())
+            result = response.choices[0].message.content.strip()
+            st.session_state["business_dev_result"] = result
+            st.subheader("📈 GPT-Generated Business Strategy")
+            st.success(result)
+
+            # Sheets + PDF same as above
+            scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+            creds = json.loads(st.secrets["google_sheets"]["service_account"])
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
+            gs_client = gspread.authorize(credentials)
+            sheet = gs_client.open_by_key(st.secrets["google_sheets"]["sheet_id"])
+            try:
+                ws = sheet.worksheet("Business Development")
+            except WorksheetNotFound:
+                ws = sheet.add_worksheet(title="Business Development", rows="100", cols="20")
+                ws.append_row(["Timestamp", "User Role", "Input", "Result"])
+            ws.append_row([
+                str(datetime.datetime.now()),
+                st.session_state.get("user_role", "guest"),
+                user_input,
+                result
+            ])
+            st.info("✅ Saved to Google Sheets.")
+
+            if st.session_state.get("user_role", "guest") == "admin":
+                if st.button("📄 Export to PDF", key="business_dev_pdf"):
+                    buffer = io.BytesIO()
+                    c = pdf_canvas.Canvas(buffer, pagesize=letter)
+                    c.drawString(100, 750, "Business Development Summary")
+                    c.drawString(100, 730, f"Input: {user_input[:80]}")
+                    c.drawString(100, 710, "GPT Output:")
+                    text = c.beginText(100, 695)
+                    for line in result.splitlines():
+                        text.textLine(line[:100])
+                    c.drawText(text)
+                    c.save()
+                    buffer.seek(0)
+                    st.download_button("Download PDF", buffer, file_name="business_development.pdf")
         except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
-
-    # Save to Google Sheets
-    try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Business Development")
-        st.info("✅ Data saved to Google Sheets.")
-    except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
-
-    # PDF Export
-    if st.button("Export to PDF", key="business_development_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Business Development Report")
-        c.drawString(100, 735, f"Input: {user_input}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="business_development_report.pdf")
+            st.error(f"❌ Error: {e}")

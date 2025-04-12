@@ -1,51 +1,85 @@
-# ✅ 1. brand_positioning_app.py
 import streamlit as st
-from openai import OpenAI
-from backend.google_sheets import save_data
+import datetime
+import json
 import io
+import gspread
+from openai import OpenAI
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-
-client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+from oauth2client.service_account import ServiceAccountCredentials
+from gspread.exceptions import WorksheetNotFound
 
 def run():
-    st.title("🗭 Brand Positioning")
-    st.markdown("### Define your market identity and positioning.")
+    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+    st.title("🏷️ Brand Positioning")
+    st.markdown("Define your unique market position and clarify your brand identity.")
 
     st.sidebar.header("💡 Brand Positioning Guide")
-    st.sidebar.write("**What this tab does:** Helps define your brand's unique position in the market.")
-    st.sidebar.write("**What to enter:** A description of your business, industry, or audience.")
-    st.sidebar.write("**How to use it:** Use the GPT-generated insight to build taglines, messaging, or customer profiles.")
+    st.sidebar.markdown("""
+    - Describe what your brand stands for, who it's for, and how it's different.
+    - GPT will help you sharpen your positioning statement.
+    - Save to Sheets or export as PDF (admin only).
+    """)
 
-    user_input = st.text_area("What do you want help with? (e.g., Define my brand for health-conscious Gen Z)", key="brand_positioning_input")
-    if st.button("✨ Autofill Suggestion", key="brand_positioning_fill"):
-        user_input = "Suggest something for brand positioning"
+    default_prompt = "We are a luxury skincare brand that uses clean ingredients and targets women over 40 who value wellness."
 
+    if "brand_positioning_autofill_triggered" not in st.session_state:
+        st.session_state["brand_positioning_autofill_triggered"] = False
 
-    if st.button("Run GPT-4o Autofill", key="brand_positioning_run") and user_input:
+    if st.button("✨ Autofill Example", key="brand_positioning_autofill"):
+        st.session_state["brand_positioning_autofill_triggered"] = True
+
+    input_value = default_prompt if st.session_state["brand_positioning_autofill_triggered"] else ""
+
+    user_input = st.text_area("Describe your brand and ideal market:", value=input_value, key="brand_positioning_input")
+
+    if st.button("🚀 Generate Positioning with GPT-4o", key="brand_positioning_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a branding expert helping define market positioning."},
+                    {"role": "system", "content": "You're a branding consultant. Help define a strong, clear brand positioning statement."},
                     {"role": "user", "content": user_input}
                 ]
             )
-            st.success(response.choices[0].message.content.strip())
+            result = response.choices[0].message.content.strip()
+            st.session_state["brand_positioning_result"] = result
+            st.subheader("🧭 GPT-Generated Brand Positioning")
+            st.success(result)
+
+            # Google Sheets
+            scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+            creds = json.loads(st.secrets["google_sheets"]["service_account"])
+            credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
+            gs_client = gspread.authorize(credentials)
+            sheet = gs_client.open_by_key(st.secrets["google_sheets"]["sheet_id"])
+            try:
+                ws = sheet.worksheet("Brand Positioning")
+            except WorksheetNotFound:
+                ws = sheet.add_worksheet(title="Brand Positioning", rows="100", cols="20")
+                ws.append_row(["Timestamp", "User Role", "Input", "Result"])
+            ws.append_row([
+                str(datetime.datetime.now()),
+                st.session_state.get("user_role", "guest"),
+                user_input,
+                result
+            ])
+            st.info("✅ Saved to Google Sheets.")
+
+            # PDF export
+            if st.session_state.get("user_role", "guest") == "admin":
+                if st.button("📄 Export to PDF", key="brand_positioning_pdf"):
+                    buffer = io.BytesIO()
+                    c = pdf_canvas.Canvas(buffer, pagesize=letter)
+                    c.drawString(100, 750, "Brand Positioning Summary")
+                    c.drawString(100, 730, f"Input: {user_input[:80]}")
+                    c.drawString(100, 710, "GPT Output:")
+                    text = c.beginText(100, 695)
+                    for line in result.splitlines():
+                        text.textLine(line[:100])
+                    c.drawText(text)
+                    c.save()
+                    buffer.seek(0)
+                    st.download_button("Download PDF", buffer, file_name="brand_positioning.pdf")
         except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
-
-    try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Brand Positioning")
-        st.info("✅ Data saved to Google Sheets.")
-    except Exception as e:
-        st.warning(f"Google Sheets not connected. Error: {e}")
-
-    if st.button("Export to PDF", key="brand_positioning_pdf"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Brand Positioning Report")
-        c.drawString(100, 735, f"Input: {user_input}")
-        c.save()
-        buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="brand_positioning_report.pdf")
+            st.error(f"❌ Error: {e}")
