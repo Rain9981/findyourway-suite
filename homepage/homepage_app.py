@@ -13,7 +13,6 @@ def run():
     - Need help? Click contact button below
     """)
 
-    # 👤 Greet by tier
     role = st.session_state.get("user_role", "guest")
     if role == "admin":
         greeting = "Welcome, Admin! You have full access to all tools and exports."
@@ -28,6 +27,25 @@ def run():
 
     st.subheader(greeting)
 
+    st.image("https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif", width=400, caption="Find Your Way Forward ✨")
+
+    st.markdown("### 🔗 Quick Navigation")
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        if st.button("📝 Client Intake"):
+            st.info("Go to the 'Client Intake' tab above.")
+    with col2:
+        if st.button("📘 Walkthrough Guide"):
+            st.info("Visit the 'Consulting Guide' tab for tips.")
+    with col3:
+        if st.button("📊 CRM Dashboard"):
+            st.info("Access the CRM Dashboard tab above.")
+
+    st.divider()
+
+    if st.button("📨 Contact Support"):
+        st.markdown("Please email us at [support@findyourwaynmc.com](mailto:support@findyourwaynmc.com)")
     # 🌍 Animated Business Visual
     st.image("https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif", width=400, caption="Find Your Way Forward ✨")
 
