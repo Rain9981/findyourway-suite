@@ -2,18 +2,17 @@ import streamlit as st
 import importlib
 import os
 
-# ✅ Page Config – only once here
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌟 Branding Section
+# 🌟 Logo + Header
 st.markdown("""
-<div style='text-align:center;'>
-    <h1>🌍 Find Your Way Network Marketing Consultants</h1>
+<div style='text-align:center; padding-bottom:10px;'>
+    <h1 style='color:#800020;'>🌍 Find Your Way Network Marketing Consultants</h1>
     <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg' width='220' style='margin-top:15px;' alt='Find Your Way Logo'>
 </div>
 """, unsafe_allow_html=True)
 
-# 🔐 Login Logic
+# 🔐 Login Setup
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -43,41 +42,23 @@ if not st.session_state["logged_in"]:
             st.error("Invalid login")
     st.stop()
 
-# ✅ Ordered Tab Flow
+# ✅ Sidebar: Role Indicator
+st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
+
+# ✅ Ordered Tabs
 tab_order = [
-    "homepage",
-    "client_intake",
-    "subscription_plans",
-    "consulting_guide",
-    "brand_positioning",
-    "business_development",
-    "lead_generation",
-    "marketing_hub",
-    "strategy_designer",
-    "business_model_canvas",
-    "operations_audit",
-    "self_enhancement",
-    "growth",
-    "kpi_tracker",
-    "forecasting",
-    "crm_manager",
-    "crm_dashboard",
-    "crm",  # CRM Insights
-    "email_marketing",
-    "credit_repair",
-    "marketing_planner",
-    "sentiment_analysis",
-    "canvas",
-    "oops_audit"
+    "homepage", "client_intake", "subscription_plans", "consulting_guide",
+    "brand_positioning", "business_development", "lead_generation", "marketing_hub",
+    "strategy_designer", "business_model_canvas", "operations_audit", "self_enhancement",
+    "growth", "kpi_tracker", "forecasting", "crm_manager", "crm_dashboard", "crm",
+    "email_marketing", "credit_repair", "marketing_planner", "sentiment_analysis",
+    "canvas", "oops_audit"
 ]
 
-# Filter to only show existing tabs
 available_tabs = [tab for tab in tab_order if os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
-
-# Sidebar Tool Selector
 selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
 
-# ▶️ Load and Run Selected Tab
+# ▶️ Load Selected Tool
 try:
     module = importlib.import_module(f"{selected}.{selected}_app")
     if hasattr(module, "run"):
