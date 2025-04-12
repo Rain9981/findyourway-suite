@@ -1,20 +1,27 @@
 import streamlit as st
+import datetime
+import io
+from reportlab.pdfgen import canvas as pdf_canvas
+from reportlab.lib.pagesizes import letter
 
 def run():
-    st.title("🧭 Consulting Guide")
+    st.title("📘 Consulting Guide")
+    st.markdown("Use this guide to understand how to navigate the full consulting suite based on your tier.")
 
-    st.sidebar.header("📘 Consulting Guide Info")
+    st.sidebar.header("🧠 Consulting Guide Tips")
     st.sidebar.markdown("""
-    - **Purpose:** This tab walks you through how to use each feature.
-    - **What to do:** Review the strategic role of each tab.
-    - **Access Level:** All users.
+    - This guide walks through each tab in the suite.
+    - Admins get a checklist to track consulting progress.
+    - Export session summaries for client records.
     """)
 
-    st.markdown("## Consulting Walkthrough")
-    st.markdown("""
-    - **Brand Positioning:** Define your market identity.
-    - **Lead Generation:** Get AI suggestions to attract new leads.
-    - **CRM Dashboard:** Track and manage client data.
-    - **Simulator:** Run scenarios and predict impact.
-    - **Forecasting:** Project financial outcomes.
-    """)
+    st.markdown("### 🔍 Tool Walkthrough Summary")
+
+    walkthrough = {
+        "Client Intake": "Start here. Collect business info, goals, and tier.",
+        "Brand Positioning": "Clarify unique value, voice, and audience.",
+        "Strategy Designer": "Design growth roadmap from AI suggestions.",
+        "Lead Generation": "Create outreach and lead magnet plans.",
+        "CRM Tabs": "Track contacts, insights, and exportable reports.",
+        "Forecasting": "Predict revenue and visualize future metrics.",
+        "
