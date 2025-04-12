@@ -5,14 +5,21 @@ import os
 # ✅ Page Setup
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# ✅ Branded Header (Centered Title, Subtitle, and Globe)
+# ✅ Branded Header (Logo + Title + Subtitle + Globe)
 st.markdown("""
 <div style='text-align:center; padding-bottom:20px;'>
 
+    <!-- Logo -->
+    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg'
+         width='200' style='margin-bottom:10px;' alt='Find Your Way Logo'>
+
+    <!-- Title -->
     <h1 style='color:#800020; font-size: 44px; font-weight: bold; margin-bottom: 8px;'>Find Your Way</h1>
 
+    <!-- Subtitle -->
     <p style='font-size:20px; color:#000000; font-weight:300; margin-top:0;'>Network Marketing Consultants</p>
 
+    <!-- Globe Image -->
     <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Blue_Marble_2001.png/300px-Blue_Marble_2001.png'
          width='65' alt='Satellite Globe' style='margin-top:10px;' />
 
@@ -50,27 +57,4 @@ if not st.session_state["logged_in"]:
     st.stop()
 
 # ✅ Sidebar Role Display
-st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
-
-# ✅ Tab Navigation Order
-tab_order = [
-    "homepage", "client_intake", "subscription_plans", "consulting_guide",
-    "brand_positioning", "business_development", "lead_generation", "marketing_hub",
-    "strategy_designer", "business_model_canvas", "operations_audit", "self_enhancement",
-    "growth", "kpi_tracker", "forecasting", "crm_manager", "crm_dashboard", "crm",
-    "email_marketing", "credit_repair", "marketing_planner", "sentiment_analysis",
-    "canvas", "oops_audit"
-]
-
-available_tabs = [tab for tab in tab_order if os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
-selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
-
-# ▶️ Load Selected Tab
-try:
-    module = importlib.import_module(f"{selected}.{selected}_app")
-    if hasattr(module, "run"):
-        module.run()
-    else:
-        st.error(f"⚠️ Tab '{selected}' is missing a run() function.")
-except Exception as e:
-    st.error(f"🚨 Could not load tab: {e}")
+st.sidebar.mark
