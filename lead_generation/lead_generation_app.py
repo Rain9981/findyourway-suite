@@ -1,3 +1,14 @@
+import streamlit as st
+import datetime
+import json
+import io
+import gspread
+from openai import OpenAI  # ✅ FIXED: added OpenAI import
+from reportlab.pdfgen import canvas as pdf_canvas
+from reportlab.lib.pagesizes import letter
+from oauth2client.service_account import ServiceAccountCredentials
+from gspread.exceptions import WorksheetNotFound
+
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     st.title("🎯 Lead Generation")
@@ -7,6 +18,7 @@ def run():
     st.sidebar.markdown("""
     - Describe who you're trying to reach and what you're offering.
     - GPT will suggest lead magnets or strategies to grow your list.
+    - Save to Sheets or export as PDF.
     """)
 
     default_prompt = "We offer a business tax course and want to collect leads through a downloadable checklist."
@@ -35,7 +47,7 @@ def run():
             st.subheader("📋 GPT-Generated Lead Strategy")
             st.success(result)
 
-            # Sheets + PDF
+            # Google Sheets saving
             scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
             creds = json.loads(st.secrets["google_sheets"]["service_account"])
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
@@ -54,6 +66,7 @@ def run():
             ])
             st.info("✅ Saved to Google Sheets.")
 
+            # PDF Export
             if st.session_state.get("user_role", "guest") == "admin":
                 if st.button("📄 Export to PDF", key="lead_gen_pdf"):
                     buffer = io.BytesIO()

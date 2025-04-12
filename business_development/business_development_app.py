@@ -1,3 +1,14 @@
+import streamlit as st
+import datetime
+import json
+import io
+import gspread
+from openai import OpenAI  # ✅ FIXED: added OpenAI import
+from reportlab.pdfgen import canvas as pdf_canvas
+from reportlab.lib.pagesizes import letter
+from oauth2client.service_account import ServiceAccountCredentials
+from gspread.exceptions import WorksheetNotFound
+
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     st.title("🏗️ Business Development")
@@ -7,6 +18,7 @@ def run():
     st.sidebar.markdown("""
     - Describe your current growth goal or new market you're exploring.
     - GPT will help you brainstorm smart strategies.
+    - Save to Sheets or export to PDF if you're an admin.
     """)
 
     default_prompt = "We want to partner with fitness brands to cross-promote our meal plan app."
@@ -35,7 +47,7 @@ def run():
             st.subheader("📈 GPT-Generated Business Strategy")
             st.success(result)
 
-            # Sheets + PDF same as above
+            # Save to Google Sheets
             scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
             creds = json.loads(st.secrets["google_sheets"]["service_account"])
             credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
