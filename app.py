@@ -4,12 +4,19 @@ import os
 
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌍 Branded Header with Globe + Title
+# 🌍 Branded Header with Logo, Globe, and Title
 st.markdown("""
 <div style='text-align:center; padding-bottom:20px;'>
-    <img src='https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif' width='120' style='margin-bottom:10px;' alt='Globe GIF'>
-    <h1 style='color:#800020; font-size:42px; font-weight:bold; margin-bottom:0;'>Find Your Way</h1>
-    <p style='font-size:18px; color:#000000; margin-top:5px; font-weight:300;'>Network Marketing Consultants</p>
+
+    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg' width='200' style='margin-bottom:10px;' alt='Find Your Way Logo'>
+
+    <div style='display:flex; align-items:center; justify-content:center; gap:10px; margin-top:5px;'>
+        <h1 style='color:#800020; font-size:40px; font-weight:bold; margin:0;'>Find Your Way</h1>
+        <img src='https://upload.wikimedia.org/wikipedia/commons/thumb/e/ec/Blue_Marble_2001.png/300px-Blue_Marble_2001.png' width='40' alt='Satellite Globe' style='margin-top:4px;' />
+    </div>
+
+    <p style='font-size:18px; color:#000000; font-weight:300; margin-top:5px;'>Network Marketing Consultants</p>
+
 </div>
 """, unsafe_allow_html=True)
 
@@ -46,7 +53,7 @@ if not st.session_state["logged_in"]:
 # ✅ Sidebar Role Indicator
 st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
 
-# ✅ Tab Navigation (Ordered by Consulting Flow)
+# ✅ Tab Navigation (Consulting Flow Order)
 tab_order = [
     "homepage", "client_intake", "subscription_plans", "consulting_guide",
     "brand_positioning", "business_development", "lead_generation", "marketing_hub",
@@ -56,11 +63,11 @@ tab_order = [
     "canvas", "oops_audit"
 ]
 
-# Filter to only show tabs that exist
+# Filter existing tabs
 available_tabs = [tab for tab in tab_order if os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
 selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
 
-# ▶️ Load Tab Module
+# ▶️ Load and Run Selected Tab
 try:
     module = importlib.import_module(f"{selected}.{selected}_app")
     if hasattr(module, "run"):
