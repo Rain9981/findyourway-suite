@@ -5,7 +5,7 @@ import os
 # ✅ Page Setup
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🔐 Login Setup
+# 🔐 Login Setup (Must Happen First)
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -35,7 +35,7 @@ if not st.session_state["logged_in"]:
             st.error("Invalid login")
     st.stop()
 
-# ✅ ✅ ✅ NOW SHOW THE HEADER ONLY AFTER LOGIN ✅ ✅ ✅
+# ✅ Branding Header (Placed AFTER login so it actually shows)
 st.markdown("""
 <div style='text-align:center; padding-bottom:20px;'>
 
@@ -52,10 +52,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# ✅ Sidebar: Display Role
+# ✅ Sidebar: Show Logged In Role
 st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
 
-# ✅ Tab Order (Consulting Workflow)
+# ✅ Tab Order (Your Consulting Flow)
 tab_order = [
     "homepage", "client_intake", "subscription_plans", "consulting_guide",
     "brand_positioning", "business_development", "lead_generation", "marketing_hub",
