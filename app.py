@@ -2,9 +2,10 @@ import streamlit as st
 import importlib
 import os
 
+# ✅ Page Config – only once here
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌟 Branding Section with Logo Only (No GIF)
+# 🌟 Branding Section
 st.markdown("""
 <div style='text-align:center;'>
     <h1>🌍 Find Your Way Network Marketing Consultants</h1>
@@ -12,7 +13,7 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# 🔐 Login with Tier-Based Access
+# 🔐 Login Logic
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -42,11 +43,41 @@ if not st.session_state["logged_in"]:
             st.error("Invalid login")
     st.stop()
 
-# 📂 Sidebar Tool Selection
-tab_dirs = [d for d in os.listdir() if os.path.isdir(d) and os.path.exists(f"{d}/{d}_app.py")]
-selected = st.sidebar.selectbox("📂 Choose a Tool", sorted(tab_dirs))
+# ✅ Ordered Tab Flow
+tab_order = [
+    "homepage",
+    "client_intake",
+    "subscription_plans",
+    "consulting_guide",
+    "brand_positioning",
+    "business_development",
+    "lead_generation",
+    "marketing_hub",
+    "strategy_designer",
+    "business_model_canvas",
+    "operations_audit",
+    "self_enhancement",
+    "growth",
+    "kpi_tracker",
+    "forecasting",
+    "crm_manager",
+    "crm_dashboard",
+    "crm",  # CRM Insights
+    "email_marketing",
+    "credit_repair",
+    "marketing_planner",
+    "sentiment_analysis",
+    "canvas",
+    "oops_audit"
+]
 
-# ▶️ Load Selected Tab
+# Filter to only show existing tabs
+available_tabs = [tab for tab in tab_order if os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
+
+# Sidebar Tool Selector
+selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
+
+# ▶️ Load and Run Selected Tab
 try:
     module = importlib.import_module(f"{selected}.{selected}_app")
     if hasattr(module, "run"):
