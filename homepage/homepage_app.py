@@ -1,8 +1,10 @@
 import streamlit as st
+import datetime
+
+# ✅ Set this BEFORE anything else
+st.set_page_config(page_title="Welcome | Find Your Way Suite", layout="centered")
 
 def run():
-    st.set_page_config(page_title="Welcome | Find Your Way Suite", layout="centered")
-
     st.title("🌐 Welcome to Find Your Way AI Consulting Suite")
 
     st.sidebar.header("🧭 Getting Started")
@@ -27,10 +29,8 @@ def run():
 
     st.subheader(greeting)
 
-    # 🌍 Animated Branding Visual
     st.image("https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif", width=400, caption="Find Your Way Forward ✨")
 
-    # ✅ Tab Navigation Buttons
     st.markdown("### 🔗 Quick Navigation")
 
     col1, col2, col3 = st.columns(3)
@@ -38,11 +38,9 @@ def run():
     with col1:
         if st.button("📝 Client Intake"):
             st.info("Go to the 'Client Intake' tab above.")
-
     with col2:
         if st.button("📘 Walkthrough Guide"):
             st.info("Visit the 'Consulting Guide' tab for tips.")
-
     with col3:
         if st.button("📊 CRM Dashboard"):
             st.info("Access the CRM Dashboard tab above.")
