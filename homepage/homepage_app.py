@@ -1,23 +1,35 @@
 import streamlit as st
 
 def run():
-    st.title("🏠 Welcome to Your Consulting Suite")
-    st.markdown("""
-    ### 👋 Hello and welcome!
+    st.set_page_config(page_title="Welcome | Find Your Way Suite", layout="centered")
 
-    This is your personalized AI-powered consulting dashboard for strategy, marketing, growth, and business development.
+    st.title("🌐 Welcome to Find Your Way AI Consulting Suite")
 
-    #### 🔑 What you can do here:
-    - Use AI tools to generate insights, strategy, and messaging.
-    - Save all activity to Google Sheets.
-    - Export consulting reports to PDF.
-    - Access tabs based on your subscription tier.
-
-    #### 📋 Quick Start Checklist:
-    1. Start with **Client Intake** or **Brand Positioning**.
-    2. Use GPT to generate ideas or complete forms.
-    3. Save your work (auto-saves if connected).
-    4. Export PDFs for your clients or team.
+    st.sidebar.header("🧭 Getting Started")
+    st.sidebar.markdown("""
+    - Begin with **Client Intake**  
+    - Use tabs based on your tier  
+    - Save/export via Sheets or PDF  
+    - Need help? Click contact button below
     """)
 
-    st.success("✅ You're logged in and ready to begin.")
+    # 👤 Greet by tier
+    role = st.session_state.get("user_role", "guest")
+    if role == "admin":
+        greeting = "Welcome, Admin! You have full access to all tools and exports."
+    elif role == "premium":
+        greeting = "Welcome, Premium Member! Dive deep into strategy, CRM, and growth tools."
+    elif role == "elite":
+        greeting = "Welcome, Elite Client! Explore advanced planning and lead generation."
+    elif role == "basic":
+        greeting = "Welcome, Basic User! Start with client intake and forecasting tools."
+    else:
+        greeting = "Welcome! Please log in to access your consulting tools."
+
+    st.subheader(greeting)
+
+    # 🌍 Animated Business Visual
+    st.image("https://media.giphy.com/media/ZVik7pBtu9dNS/giphy.gif", width=400, caption="Find Your Way Forward ✨")
+
+    # ✅ Quick Help Buttons
+    col1, col2, col3 = st.columns(3
