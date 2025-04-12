@@ -1,50 +1,82 @@
 import streamlit as st
 from openai import OpenAI
-from backend.google_sheets import save_data
 import io
+import datetime
+import json
+import gspread
+from backend.google_sheets import save_data
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
+from oauth2client.service_account import ServiceAccountCredentials
+from gspread.exceptions import WorksheetNotFound
 
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
 def run():
-    st.title("🎯 Strategic Canvas")
-    st.markdown("### Visualize your unique market positioning.")
+    st.title("🧩 Business Canvas Builder")
+    st.markdown("### Enter your business idea or concept to generate a strategic canvas.")
 
-    st.sidebar.header("💡 Strategic Canvas Guide")
-    st.sidebar.write("**What this tab does:** Helps you compare your business against competitors.")
-    st.sidebar.write("**What to enter:** Describe your value curve, strengths, or what sets you apart.")
-    st.sidebar.write("**How to use it:** Use GPT-4o to generate a strategic comparison of your value dimensions.")
+    st.sidebar.header("💡 Canvas Builder Guide")
+    st.sidebar.markdown("""
+    - **What this tab does:** Builds a business model canvas from your idea.
+    - **What to enter:** Your product, service, or business concept.
+    - **How to use:** Paste your idea or use autofill. GPT will generate canvas-style guidance.
+    """)
 
-    user_input = st.text_area("What market or competitors are you comparing?", key="canvas_input")
-    if st.button("✨ Autofill Suggestion", key="canvas_fill"):
-        user_input = "Suggest something for canvas"
+    default_prompt = "I’m starting a mobile car detailing service in urban neighborhoods. I need a business model canvas."
 
+    if "canvas_autofill_triggered" not in st.session_state:
+        st.session_state["canvas_autofill_triggered"] = False
 
-    if st.button("Run GPT-4o Autofill", key="canvas_run") and user_input:
+    if st.button("✨ Autofill Suggestion", key="canvas_autofill"):
+        st.session_state["canvas_autofill_triggered"] = True
+
+    input_value = default_prompt if st.session_state["canvas_autofill_triggered"] else ""
+
+    user_input = st.text_area("Describe your business idea:", value=input_value, key="canvas_input")
+
+    if st.button("🚀 Generate Canvas", key="canvas_run") and user_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {"role": "system", "content": "You are a strategic consultant helping a business map out a competitive canvas."},
+                    {"role": "system", "content": "You're a strategist building business model canvases."},
                     {"role": "user", "content": user_input}
                 ]
             )
-            st.success(response.choices[0].message.content.strip())
+            st.session_state["canvas_result"] = response.choices[0].message.content.strip()
+            st.success(st.session_state["canvas_result"])
         except Exception as e:
             st.error(f"❌ GPT Error: {e}")
 
     try:
-        save_data(st.session_state.get("user_role", "guest"), {"input": user_input}, sheet_tab="Canvas")
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = json.loads(st.secrets["google_sheets"]["service_account"])
+        credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
+        client_gsheets = gspread.authorize(credentials)
+        sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
+        try:
+            worksheet = sheet.worksheet("Canvas")
+        except WorksheetNotFound:
+            worksheet = sheet.add_worksheet(title="Canvas", rows="100", cols="20")
+        if not worksheet.get_all_values():
+            worksheet.append_row(["Timestamp", "User Role", "Input", "Canvas Result"])
+        worksheet.append_row([
+            str(datetime.datetime.now()),
+            st.session_state.get("user_role", "guest"),
+            user_input,
+            st.session_state.get("canvas_result", "")
+        ])
         st.info("✅ Data saved to Google Sheets.")
     except Exception as e:
         st.warning(f"Google Sheets not connected. Error: {e}")
 
-    if st.button("Export to PDF", key="canvas_pdf"):
+    if st.button("📄 Export to PDF", key="canvas_pdf"):
         buffer = io.BytesIO()
         c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "Strategic Canvas Report")
+        c.drawString(100, 750, "Business Canvas Report")
         c.drawString(100, 735, f"Input: {user_input}")
+        c.drawString(100, 720, f"Result: {st.session_state.get('canvas_result', '')}")
         c.save()
         buffer.seek(0)
-        st.download_button("Download PDF", buffer, file_name="canvas_report.pdf")
+        st.download_button("Download PDF", buffer, file_name="business_canvas_report.pdf")
