@@ -5,23 +5,6 @@ import os
 # ✅ Page Setup
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# ✅ Branding Header (Logo + Title + Subtitle + Globe)
-st.markdown("""
-<div style='text-align:center; padding-bottom:20px;'>
-
-    <!-- Logo -->
-    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg'
-         width='220' style='margin-bottom:10px;' alt='Find Your Way Logo'>
-
-    <!-- Title -->
-    <h1 style='color:#800020; font-size:42px; font-weight:bold; margin-bottom:0;'>Find Your Way</h1>
-
-    <!-- Subtitle -->
-    <p style='font-size:18px; color:#000000; margin-top:5px; font-weight:300;'>Network Marketing Consultants</p>
-
-</div>
-""", unsafe_allow_html=True)
-
 # 🔐 Login Setup
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
@@ -51,6 +34,23 @@ if not st.session_state["logged_in"]:
         else:
             st.error("Invalid login")
     st.stop()
+
+# ✅ ✅ ✅ NOW SHOW THE HEADER ONLY AFTER LOGIN ✅ ✅ ✅
+st.markdown("""
+<div style='text-align:center; padding-bottom:20px;'>
+
+    <!-- Logo -->
+    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg'
+         width='220' style='margin-bottom:10px;' alt='Find Your Way Logo'>
+
+    <!-- Title -->
+    <h1 style='color:#800020; font-size:42px; font-weight:bold; margin-bottom:0;'>Find Your Way</h1>
+
+    <!-- Subtitle -->
+    <p style='font-size:18px; color:#000000; margin-top:5px; font-weight:300;'>Network Marketing Consultants</p>
+
+</div>
+""", unsafe_allow_html=True)
 
 # ✅ Sidebar: Display Role
 st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
