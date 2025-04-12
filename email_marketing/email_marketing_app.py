@@ -45,11 +45,11 @@ def run():
             )
             result = response.choices[0].message.content.strip()
             st.session_state["email_marketing_result"] = result
+
+            # ✅ Display result
+            st.subheader("📨 Your AI-Generated Email")
             st.success(result)
-        except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
-            result = None
-        else:
+
             # ✅ Save to Google Sheets
             try:
                 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
@@ -87,3 +87,6 @@ def run():
                     c.save()
                     buffer.seek(0)
                     st.download_button("Download PDF", buffer, file_name="email_campaign.pdf")
+
+        except Exception as e:
+            st.error(f"❌ GPT Error: {e}")
