@@ -8,11 +8,12 @@ st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 st.markdown("""
 <div style='text-align:center; padding-bottom:20px;'>
 
-    <img src='https://raw.githubusercontent.com/Rain9981/FindYourWay_CleanPush/main/assets/logo2Find_You_Way.png'
+    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/logo2Find_You_Way_v2.png'
          width='220' style='margin-bottom:10px;' alt='Find Your Way Logo'>
 
 </div>
 """, unsafe_allow_html=True)
+
 
 
 # 🔐 Login Setup
