@@ -6,11 +6,14 @@ st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
 # 🌟 Logo + Header
 st.markdown("""
-<div style='text-align:center; padding-bottom:10px;'>
-    <h1 style='color:#800020;'>🌍 Find Your Way Network Marketing Consultants</h1>
-    <img src='https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/findyourway_logo.jpg' width='220' style='margin-top:15px;' alt='Find Your Way Logo'>
+<div style='text-align:center; padding-bottom:20px;'>
+
+    <img src='https://raw.githubusercontent.com/Rain9981/FindYourWay_CleanPush/main/assets/logo2Find_You_Way.png'
+         width='220' style='margin-bottom:10px;' alt='Find Your Way Logo'>
+
 </div>
 """, unsafe_allow_html=True)
+
 
 # 🔐 Login Setup
 if "logged_in" not in st.session_state:
