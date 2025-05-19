@@ -4,16 +4,14 @@ import os
 
 st.set_page_config(page_title="Find Your Way Consulting Suite", layout="wide")
 
-# 🌟 Logo + Header
+# 🌟 Logo
 st.image(
     "https://raw.githubusercontent.com/Rain9981/findyourway-suite/main/assets/logo2Find_You_Way_v2.png",
     width=220,
     caption=None,
 )
 
-
-
-# 🔐 Login Setup
+# 🔐 Login
 if "logged_in" not in st.session_state:
     st.session_state["logged_in"] = False
     st.session_state["user_role"] = "guest"
@@ -24,29 +22,49 @@ if not st.session_state["logged_in"]:
     password = st.text_input("Password", type="password")
     if st.button("Login"):
         if password == "FindYourWayNMC520":
-            st.session_state["logged_in"] = True
             st.session_state["user_role"] = "admin"
-            st.rerun()
         elif password == "premium":
-            st.session_state["logged_in"] = True
             st.session_state["user_role"] = "premium"
-            st.rerun()
         elif password == "elite":
-            st.session_state["logged_in"] = True
             st.session_state["user_role"] = "elite"
-            st.rerun()
         elif password == "basic":
-            st.session_state["logged_in"] = True
             st.session_state["user_role"] = "basic"
-            st.rerun()
         else:
             st.error("Invalid login")
-    st.stop()
+            st.stop()
+        st.session_state["logged_in"] = True
+        st.rerun()
 
-# ✅ Sidebar: Role Indicator
-st.sidebar.markdown(f"🧾 **Logged in as:** `{st.session_state['user_role'].capitalize()}`")
+# ✅ Sidebar: Role Display
+role = st.session_state.get("user_role", "guest")
+st.sidebar.markdown(f"🧾 **Logged in as:** `{role.capitalize()}`")
 
-# ✅ Ordered Tabs
+# ✅ Tier Access Dictionary
+tier_access = {
+    "basic": ["homepage", "client_intake", "subscription_plans", "consulting_guide", "credit_repair"],
+    "elite": [
+        "homepage", "client_intake", "subscription_plans", "consulting_guide",
+        "brand_positioning", "business_development", "lead_generation", "marketing_hub",
+        "strategy_designer", "operations_audit", "growth", "kpi_tracker", "forecasting", "credit_repair"
+    ],
+    "premium": [
+        "homepage", "client_intake", "subscription_plans", "consulting_guide",
+        "brand_positioning", "business_development", "lead_generation", "marketing_hub",
+        "strategy_designer", "operations_audit", "growth", "kpi_tracker", "forecasting",
+        "crm_manager", "crm_dashboard", "crm", "email_marketing", "credit_repair",
+        "marketing_planner", "sentiment_analysis", "canvas", "oops_audit"
+    ],
+    "admin": [  # Full access
+        "homepage", "client_intake", "subscription_plans", "consulting_guide",
+        "brand_positioning", "business_development", "lead_generation", "marketing_hub",
+        "strategy_designer", "business_model_canvas", "operations_audit", "self_enhancement",
+        "growth", "kpi_tracker", "forecasting", "crm_manager", "crm_dashboard", "crm",
+        "email_marketing", "credit_repair", "marketing_planner", "sentiment_analysis",
+        "canvas", "oops_audit"
+    ]
+}
+
+# ✅ Tab Visibility Logic
 tab_order = [
     "homepage", "client_intake", "subscription_plans", "consulting_guide",
     "brand_positioning", "business_development", "lead_generation", "marketing_hub",
@@ -56,15 +74,20 @@ tab_order = [
     "canvas", "oops_audit"
 ]
 
-available_tabs = [tab for tab in tab_order if os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
+allowed_tabs = tier_access.get(role, [])
+available_tabs = [tab for tab in tab_order if tab in allowed_tabs and os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
+
 selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
 
-# ▶️ Load Selected Tool
+# ▶️ Load Selected Tab with Try Block
 try:
-    module = importlib.import_module(f"{selected}.{selected}_app")
-    if hasattr(module, "run"):
-        module.run()
+    if selected not in allowed_tabs:
+        st.warning("🔒 This tool is not available on your current subscription. Upgrade to unlock it.")
     else:
-        st.error(f"⚠️ Tab '{selected}' is missing a run() function.")
+        module = importlib.import_module(f"{selected}.{selected}_app")
+        if hasattr(module, "run"):
+            module.run()
+        else:
+            st.error(f"⚠️ Tab '{selected}' is missing a run() function.")
 except Exception as e:
     st.error(f"🚨 Could not load tab: {e}")
