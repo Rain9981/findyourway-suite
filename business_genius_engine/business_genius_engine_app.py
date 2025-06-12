@@ -1,12 +1,13 @@
 import streamlit as st
 from openai import OpenAI
 from backend.email_utils import send_email
-from reportlab.pdfgen import canvas
+from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
 import datetime
 import io
 
 def run():
+    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
     st.title("🧠 Business Genius Engine")
     st.caption("Your AI-powered strategic transformation engine.")
 
