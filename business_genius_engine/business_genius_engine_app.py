@@ -7,11 +7,6 @@ import datetime
 import io
 
 def run():
-    # Only show tab for Admin
-    if st.session_state.get("user_role") != "Admin":
-        st.warning("This tool is only available to Admins.")
-        st.stop()
-
     st.title("🧠 Business Genius Engine")
     st.caption("Your AI-powered strategic transformation engine.")
 
