@@ -116,7 +116,7 @@ def run():
     if st.button("🚀 Generate My Genius Strategy"):
         # GPT Prompt Assembly
         gpt_prompt = f"""
-        Act as a top-tier business consultant trained in management, marketing, branding, business development, network building, and mindset coaching. Respond like a Pulitzer-level strategist.
+        Act as a top-tier business consultant trained in management, marketing, branding, business development, network building, and       mindset coaching. Respond like a Pulitzer-level strategist.
 
         Business Name: {business_name}
         Description: {business_type}
@@ -135,20 +135,23 @@ def run():
         Vision: {vision}
 
         Return a full strategy guide with:
-        - Brand and marketing plan
-        - Offer structure
-        - Funnel or conversion strategy
-        - Business credit tips
-        - Letter from their future successful self
-        - Recommendations for the 5 consulting focus areas
-        - Suggestions for:
+         - Brand and marketing plan
+         - Offer structure
+         - Funnel or conversion strategy
+         - Business credit tips
+         - Letter from their future successful self
+         - Action steps across the 5 consulting areas (Mindset, Marketing, Branding, Business Development, Network Building)
+         - Personalized recommendations for Find Your Way tools the client should use next:
           - Find Your Way Academy
-          - Unshakable Self
-          - 21-Day Peak Mode
+          - Unshakable Self system
+          - 21-Day Peak Mode Challenge
           - Credit Repair Tool
           - AI Goal Dashboard
-          - Specific AI Suite Tabs (based on context)
-        """
+          - Relevant AI Suite tabs (based on their goals and challenges)
+
+          Speak directly to the client as if this is their customized strategy roadmap.
+          """
+
 
         response = client.chat.completions.create(
             model="gpt-4o",
@@ -161,7 +164,7 @@ def run():
 
         # PDF Export
         pdf_buffer = io.BytesIO()
-        pdf = canvas.Canvas(pdf_buffer, pagesize=letter)
+        pdf = pdf_canvas.Canvas(pdf_buffer, pagesize=letter)
         width, height = letter
         pdf.setFont("Helvetica-Bold", 14)
         pdf.drawString(50, height - 40, "Your Business Genius Strategy Report")
