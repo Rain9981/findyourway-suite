@@ -1,10 +1,12 @@
 import streamlit as st
+import datetime
+import json
+import io
 from openai import OpenAI
-from backend.email_utils import send_email
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-import datetime
-import io
+from backend.email_utils import send_email
+
 
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
