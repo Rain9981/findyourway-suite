@@ -31,7 +31,7 @@ def run():
     """)
 
 
-    client = OpenAI(api_key=st.secrets["openai_api_key"])
+    client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
     # Autofill logic toggle
     col_toggle, col_button = st.columns([0.6, 0.4])
