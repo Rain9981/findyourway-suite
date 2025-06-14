@@ -158,7 +158,7 @@ These are the core programs and tools available in the Find Your Way ecosystem. 
 5. **AI Goal Dashboard**: A strategic planning suite with SMART goal creation, 90-day tracking, weekly progress insights, and AI reflections. It helps users break down major goals, stay accountable, and make data-informed adjustments as they grow.
 
 Use these programs to guide users based on their specific needs, stage, and goals.
-"""
+
 
           - Relevant AI Suite tabs (based on their goals and challenges)
 
