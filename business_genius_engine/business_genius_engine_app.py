@@ -116,7 +116,7 @@ def run():
     if st.button("🚀 Generate My Genius Strategy"):
         # GPT Prompt Assembly
         gpt_prompt = f"""
-        Act as a world-class business consultant representing the brand 'Find Your Way'. Speak as the expert voice of this consulting system — confident, motivational, and transformative — and respond like a Pulitzer-level strategist.
+        Act as a world-class business consultant representing the brand 'Find Your Way'. Speak as the expert voice of this consulting system - confident, motivational, and transformative - and respond like a Pulitzer-level strategist.
 Sign any letters or reports as “Find Your Way Strategy Team.”
 
 
@@ -147,7 +147,7 @@ Sign any letters or reports as “Find Your Way Strategy Team.”
           program_descriptions = """
 These are the core programs and tools available in the Find Your Way ecosystem. Use these descriptions when recommending the most helpful resources:
 
-1. **Find Your Way Academy**: A scholar-style business growth course designed for entrepreneurs. It teaches five core modules covering communication, branding, marketing, financial readiness, and personal leadership — all structured for self-paced learning with reflection exercises and AI-enhanced feedback.
+1. **Find Your Way Academy**: A scholar-style business growth course designed for entrepreneurs. It teaches five core modules covering communication, branding, marketing, financial readiness, and personal leadership - all structured for self-paced learning with reflection exercises and AI-enhanced feedback.
 
 2. **Unshakable Self**: A personal empowerment and confidence transformation program. It combines reflective journaling, mindset coaching prompts, and self-mastery exercises to help entrepreneurs overcome fear, imposter syndrome, and self-doubt on the path to success.
 
