@@ -116,7 +116,9 @@ def run():
     if st.button("🚀 Generate My Genius Strategy"):
         # GPT Prompt Assembly
         gpt_prompt = f"""
-        Act as a top-tier business consultant trained in management, marketing, branding, business development, network building, and       mindset coaching. Respond like a Pulitzer-level strategist.
+        Act as a world-class business consultant representing the brand 'Find Your Way'. Speak as the expert voice of this consulting system — confident, motivational, and transformative — and respond like a Pulitzer-level strategist.
+Sign any letters or reports as “Find Your Way Strategy Team.”
+
 
         Business Name: {business_name}
         Description: {business_type}
@@ -186,8 +188,9 @@ def run():
                 recipient_email=user_email,
                 subject="Your Business Genius Strategy Report",
                 body=gpt_output_text,
-                sender_email=st.secrets["smtp_user"],
-                sender_password=st.secrets["smtp_password"]
+                sender_email=st.secrets["email"]["smtp_user"],
+                sender_password=st.secrets["email"]["smtp_password"]
+
             )
             if email_sent:
                 st.success("📬 Strategy sent to your email!")
