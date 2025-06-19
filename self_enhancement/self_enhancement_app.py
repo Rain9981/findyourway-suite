@@ -95,17 +95,27 @@ def run():
            buffer.seek(0)
            st.download_button("📄 Download PDF", buffer, file_name="journal_reflection.pdf", key="download_pdf1")
 
-        if st.button("📧 Send to Email", key="email1"):
+    # --- Journal Insight Email Field + Send
+    st.markdown("#### 📧 Email Your Insight")
+
+    user_email = st.text_input("Enter your email address:", key="journal_email")
+
+    if st.button("📧 Send to Email", key="email1") and user_email:
+        try:
             email_sent = send_email(
-            subject="Your Self Enhancement Insight",
-            body=st.session_state["journal_insight"],
-            sender_email=st.secrets["email"]["smtp_user"],
-            sender_password=st.secrets["email"]["smtp_password"]
-        )
-        if email_sent:
-            st.success("✅ Sent to your email.")
-        else:
-            st.error("❌ Email failed to send.")
+                subject="Your Self Enhancement Insight",
+                body=st.session_state["journal_insight"],
+                sender_email=st.secrets["email"]["smtp_user"],
+                sender_password=st.secrets["email"]["smtp_password"],
+                recipient_email=user_email
+            )
+            if email_sent:
+                st.success("✅ Sent to your email.")
+            else:
+                st.error("❌ Email failed to send.")
+        except Exception as e:
+            st.error(f"Email Error: {e}")
+
 
 
     # --- Future Self
