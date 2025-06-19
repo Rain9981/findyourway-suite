@@ -58,8 +58,8 @@ def run():
     journal_input = st.text_area("Write a thought, feeling, or struggle:", "")
 
     if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
-    try:
-        response = client.chat.completions.create(
+        try:
+            response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
                 {"role": "system", "content": "You're a mindset coach helping reframe emotional thoughts and offer a micro-action for      growth."},
@@ -78,24 +78,24 @@ def run():
 
     # --- Export and Email after Insight is Generated
     if "journal_insight" in st.session_state:
-    st.markdown("#### 📤 What would you like to do with this insight?")
+        st.markdown("#### 📤 What would you like to do with this insight?")
     
-    if st.button("📄 Export to PDF", key="pdf1"):
-        buffer = io.BytesIO()
-        c = pdf_canvas.Canvas(buffer, pagesize=letter)
-        c.drawString(100, 750, "AI Journal Reflection")
-        c.drawString(100, 735, f"Entry: {journal_input[:60]}...")
-        c.drawString(100, 720, "Insight:")
-        text_object = c.beginText(100, 705)
-        for line in st.session_state["journal_insight"].split("\n"):
+        if st.button("📄 Export to PDF", key="pdf1"):
+           buffer = io.BytesIO()
+           c = pdf_canvas.Canvas(buffer, pagesize=letter)
+           c.drawString(100, 750, "AI Journal Reflection")
+           c.drawString(100, 735, f"Entry: {journal_input[:60]}...")
+           c.drawString(100, 720, "Insight:")
+           text_object = c.beginText(100, 705)
+           for line in st.session_state["journal_insight"].split("\n"):
             text_object.textLine(line)
-        c.drawText(text_object)
-        c.save()
-        buffer.seek(0)
-        st.download_button("📄 Download PDF", buffer, file_name="journal_reflection.pdf", key="download_pdf1")
+           c.drawText(text_object)
+           c.save()
+           buffer.seek(0)
+           st.download_button("📄 Download PDF", buffer, file_name="journal_reflection.pdf", key="download_pdf1")
 
-    if st.button("📧 Send to Email", key="email1"):
-        email_sent = send_email(
+        if st.button("📧 Send to Email", key="email1"):
+            email_sent = send_email(
             subject="Your Self Enhancement Insight",
             body=st.session_state["journal_insight"],
             sender_email=st.secrets["email"]["smtp_user"],
