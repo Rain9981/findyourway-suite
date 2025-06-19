@@ -5,7 +5,7 @@ import datetime
 import json
 import gspread
 from backend.google_sheets import save_data
-from backend.email_sender import send_email
+from backend.email_utils import send_email
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
 from oauth2client.service_account import ServiceAccountCredentials
