@@ -71,7 +71,7 @@ tab_order = [
     "strategy_designer", "business_model_canvas", "operations_audit", "self_enhancement",
     "growth", "kpi_tracker", "forecasting", "crm_manager", "crm_dashboard", "crm",
     "email_marketing", "credit_repair", "marketing_planner", "sentiment_analysis",
-    "canvas", "oops_audit", "business_genius_engine", "Mastermind_analyzer"
+    "canvas", "oops_audit", "business_genius_engine", "mastermind_analyzer"
 ]
 
 allowed_tabs = tier_access.get(role, [])
