@@ -70,7 +70,13 @@ def run():
             st.success(insight)
 
             # Save to Sheets
-            save_data("Self Enhancement", [str(datetime.datetime.now()), st.session_state.get("user_role", "guest"), journal_input, insight])
+            save_data("Self Enhancement", {
+    "Date": str(datetime.datetime.now()),
+    "Role": st.session_state.get("user_role", "guest"),
+    "Entry": journal_input,
+    "Insight": insight
+})
+
 
             if st.button("📄 Export to PDF", key="pdf1"):
                 buffer = io.BytesIO()
