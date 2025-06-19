@@ -57,7 +57,7 @@ def run():
     st.markdown("#### 📘 AI Journal Entry Expander")
     journal_input = st.text_area("Write a thought, feeling, or struggle:", "")
 
-        if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
+    if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
