@@ -54,15 +54,15 @@ def run():
             st.error(f"GPT Error: {e}")
 
     # --- AI Journal Entry
-st.markdown("#### 📘 AI Journal Entry Expander")
-journal_input = st.text_area("Write a thought, feeling, or struggle:", "")
+    st.markdown("#### 📘 AI Journal Entry Expander")
+    journal_input = st.text_area("Write a thought, feeling, or struggle:", "")
 
-if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
+    if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
     try:
         response = client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You're a mindset coach helping reframe emotional thoughts and offer a micro-action for growth."},
+                {"role": "system", "content": "You're a mindset coach helping reframe emotional thoughts and offer a micro-action for      growth."},
                 {"role": "user", "content": f"Help me reframe this: {journal_input}"}
             ]
         )
@@ -76,8 +76,8 @@ if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
     except Exception as e:
         st.error(f"GPT Error: {e}")
 
-# --- Export and Email after Insight is Generated
-if "journal_insight" in st.session_state:
+    # --- Export and Email after Insight is Generated
+    if "journal_insight" in st.session_state:
     st.markdown("#### 📤 What would you like to do with this insight?")
     
     if st.button("📄 Export to PDF", key="pdf1"):
