@@ -54,47 +54,58 @@ def run():
             st.error(f"GPT Error: {e}")
 
     # --- AI Journal Entry
-    st.markdown("#### 📘 AI Journal Entry Expander")
-    journal_input = st.text_area("Write a thought, feeling, or struggle:", "")
+st.markdown("#### 📘 AI Journal Entry Expander")
+journal_input = st.text_area("Write a thought, feeling, or struggle:", "")
 
-    if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You're a mindset coach helping reframe emotional thoughts and offer a micro-action for growth."},
-                    {"role": "user", "content": f"Help me reframe this: {journal_input}"}
-                ]
-            )
-            insight = response.choices[0].message.content.strip()
-            st.success(insight)
+if st.button("🔍 Reflect & Reframe", key="journal_reframe") and journal_input:
+    try:
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You're a mindset coach helping reframe emotional thoughts and offer a micro-action for growth."},
+                {"role": "user", "content": f"Help me reframe this: {journal_input}"}
+            ]
+        )
+        insight = response.choices[0].message.content.strip()
+        st.session_state["journal_insight"] = insight
+        st.success(insight)
 
-            # Save to Sheets
-            save_data("Self Enhancement", {
-    "Date": str(datetime.datetime.now()),
-    "Role": st.session_state.get("user_role", "guest"),
-    "Entry": journal_input,
-    "Insight": insight
-})
+        # Save to Sheets
+        save_data("Self Enhancement", [str(datetime.datetime.now()), st.session_state.get("user_role", "guest"), journal_input, insight])
 
+    except Exception as e:
+        st.error(f"GPT Error: {e}")
 
-            if st.button("📄 Export to PDF", key="pdf1"):
-                buffer = io.BytesIO()
-                c = pdf_canvas.Canvas(buffer, pagesize=letter)
-                c.drawString(100, 750, "AI Journal Reflection")
-                c.drawString(100, 735, f"Entry: {journal_input[:60]}...")
-                c.drawString(100, 720, "Insight:")
-                c.drawString(100, 705, insight[:80])
-                c.save()
-                buffer.seek(0)
-                st.download_button("Download PDF", buffer, file_name="journal_reflection.pdf")
+# --- Export and Email after Insight is Generated
+if "journal_insight" in st.session_state:
+    st.markdown("#### 📤 What would you like to do with this insight?")
+    
+    if st.button("📄 Export to PDF", key="pdf1"):
+        buffer = io.BytesIO()
+        c = pdf_canvas.Canvas(buffer, pagesize=letter)
+        c.drawString(100, 750, "AI Journal Reflection")
+        c.drawString(100, 735, f"Entry: {journal_input[:60]}...")
+        c.drawString(100, 720, "Insight:")
+        text_object = c.beginText(100, 705)
+        for line in st.session_state["journal_insight"].split("\n"):
+            text_object.textLine(line)
+        c.drawText(text_object)
+        c.save()
+        buffer.seek(0)
+        st.download_button("📄 Download PDF", buffer, file_name="journal_reflection.pdf", key="download_pdf1")
 
-            if st.button("📧 Send to Email", key="email1"):
-                send_email("Your Self Enhancement Insight", insight)
-                st.info("✅ Sent to your email.")
+    if st.button("📧 Send to Email", key="email1"):
+        email_sent = send_email(
+            subject="Your Self Enhancement Insight",
+            body=st.session_state["journal_insight"],
+            sender_email=st.secrets["email"]["smtp_user"],
+            sender_password=st.secrets["email"]["smtp_password"]
+        )
+        if email_sent:
+            st.success("✅ Sent to your email.")
+        else:
+            st.error("❌ Email failed to send.")
 
-        except Exception as e:
-            st.error(f"GPT Error: {e}")
 
     # --- Future Self
     st.markdown("#### 🧭 Future Self Alignment")
