@@ -7,7 +7,6 @@ from backend.google_sheets import save_data
 from backend.email_utils import send_email
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-from oauth2client.service_account import ServiceAccountCredentials
 from gspread.exceptions import WorksheetNotFound
 
 client = OpenAI(api_key=st.secrets["openai"]["api_key"])
@@ -41,94 +40,103 @@ def run():
         horizontal=True
     )
 
-    if st.button("🔮 Suggest Smart Thought"):
-        st.session_state["input_text"] = {
-            "🧘‍♂️ Inner Peace & Focus": "I feel distracted and want to slow down my thoughts.",
-            "💪 Confidence & Power": "Lately I’ve been second-guessing myself.",
-            "🎯 Discipline & Motivation": "I’ve been procrastinating too much.",
-            "🧠 Wisdom & Strategic Thinking": "I’m at a crossroads and unsure which direction to take.",
-            "❤️ Healing & Self-Forgiveness": "I can’t stop replaying past mistakes."
-        }.get(need, "")
+    smart_thoughts = {
+        "🧘‍♂️ Inner Peace & Focus": "I feel distracted and want to slow down my thoughts.",
+        "💪 Confidence & Power": "Lately I’ve been second-guessing myself.",
+        "🎯 Discipline & Motivation": "I’ve been procrastinating too much.",
+        "🧠 Wisdom & Strategic Thinking": "I’m at a crossroads and unsure which direction to take.",
+        "❤️ Healing & Self-Forgiveness": "I can’t stop replaying past mistakes."
+    }
 
-    input_text = st.text_area("📝 What's on your mind?", value=st.session_state.get("input_text", ""), height=150)
-    user_email = st.text_input("📧 Enter your email to receive insights (optional)")
+    if st.button("✨ Suggest Smart Thought"):
+        st.session_state.input_text = smart_thoughts.get(need, "")
+
+    input_text = st.text_area(
+        "📝 What's on your mind?",
+        value=st.session_state.get("input_text", ""),
+        height=150
+    )
+
+    user_email = st.text_input("📧 Enter your email to receive results (optional)")
 
     if st.button("💡 Generate Insight"):
-        base_prompt = f"""
-        Act as a motivational life coach helping someone practice emotional awareness and cognitive reframing.
+        prompt = f"""
+        Act as a motivational life coach helping someone reframe their thinking.
 
-        Their focus today is: {need}
-        Their journal input: {input_text}
+        Focus: {need}
+        Thought: {input_text}
 
         Respond with:
-        1. A short, empowering mindset shift (reframe)
-        2. A micro-action they can take today
-        3. One supportive affirmation
+        - A mindset reframe
+        - A micro-action to take today
+        - An affirmation
 
         Label each part clearly.
         """
+
         try:
             response = client.chat.completions.create(
                 model="gpt-4o",
-                messages=[{"role": "user", "content": base_prompt}]
+                messages=[{"role": "user", "content": prompt}]
             )
-            insight = response.choices[0].message.content
-            st.session_state["insight_output"] = insight
+            output = response.choices[0].message.content
 
-            st.markdown("### 🌟 GPT Insight")
-            st.write(insight)
+            st.markdown("### 🌟 Reframe Insight")
+            st.write(output)
 
             save_data("Self Enhancement", {
                 "Date": str(datetime.date.today()),
                 "Need": need,
                 "Thought": input_text,
-                "Response": insight
+                "Response": output
             })
+
+            if user_email:
+                sent = send_email(
+                    recipient_email=user_email,
+                    subject="🧠 Your Self Enhancement Insight",
+                    body=output,
+                    sender_email=st.secrets["email"]["smtp_user"],
+                    sender_password=st.secrets["email"]["smtp_password"]
+                )
+                if sent:
+                    st.success("📬 Sent to your email!")
+                else:
+                    st.error("❌ Email failed to send.")
+
+            st.download_button("📄 Download Reflection PDF", io.BytesIO(create_pdf("Self Enhancement Reflection", output)), file_name="reflection.pdf")
 
         except Exception as e:
             st.error(f"GPT Error: {e}")
 
-    # Display output if available
-    if "insight_output" in st.session_state:
-        st.markdown("### 🌟 GPT Insight")
-        st.write(st.session_state["insight_output"])
-
-        if st.download_button("📄 Download PDF", io.BytesIO(create_pdf(st.session_state["insight_output"])), file_name="self_enhancement.pdf"):
-            pass
-
-        if user_email and st.button("📬 Email This Insight"):
-            email_sent = send_email(
-                recipient_email=user_email,
-                subject="🧠 Your Self Enhancement Insight",
-                body=st.session_state["insight_output"],
-                sender_email=st.secrets["email"]["smtp_user"],
-                sender_password=st.secrets["email"]["smtp_password"]
-            )
-            if email_sent:
-                st.success("📬 Sent to your email!")
-            else:
-                st.error("❌ Failed to send email.")
-
     st.markdown("---")
     st.subheader("📬 Message to My Future Self")
 
-    future_note = st.text_area("What would you like to tell your future self?", key="future_note", height=150)
+    future_note = st.text_area("Write a message to your Future Self:", height=150)
 
     if st.button("🔁 Get Future Self Response"):
-        try:
-            fs_prompt = f"""
-            Respond as their wiser, future self (2 years ahead).
-            They wrote: {future_note}
+        fs_prompt = f"""
+        Respond as the user's future self (2 years ahead). They wrote:
 
-            Give a message of reassurance, perspective, and one request they’d thank themselves for doing today.
-            Sign off as “Your Future Self”.
-            """
+        "{future_note}"
+
+        Give:
+        1. A message of reassurance
+        2. A wise perspective
+        3. One action they’ll thank themselves for doing today
+
+        End the message as: "– Your Future Self"
+        """
+
+        try:
             fs_response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[{"role": "user", "content": fs_prompt}]
             )
             fs_output = fs_response.choices[0].message.content
-            st.session_state["fs_output"] = fs_output
+
+            st.markdown("### 📜 Future Self Message")
+            st.write(fs_output)
 
             save_data("Self Enhancement", {
                 "Date": str(datetime.date.today()),
@@ -136,39 +144,34 @@ def run():
                 "Future Response": fs_output
             })
 
+            if user_email:
+                sent = send_email(
+                    recipient_email=user_email,
+                    subject="📬 Message from Your Future Self",
+                    body=fs_output,
+                    sender_email=st.secrets["email"]["smtp_user"],
+                    sender_password=st.secrets["email"]["smtp_password"]
+                )
+                if sent:
+                    st.success("📩 Future self email sent!")
+                else:
+                    st.error("❌ Email failed to send.")
+
+            st.download_button("📄 Download Future Self PDF", io.BytesIO(create_pdf("Message from Your Future Self", fs_output)), file_name="future_self.pdf")
+
         except Exception as e:
             st.error(f"GPT Error: {e}")
 
-    if "fs_output" in st.session_state:
-        st.markdown("### 📜 Future Self Message")
-        st.write(st.session_state["fs_output"])
-
-        if st.download_button("📄 Download Future Self PDF", io.BytesIO(create_pdf(st.session_state["fs_output"])), file_name="future_self.pdf"):
-            pass
-
-        if user_email and st.button("📩 Email Future Self Message"):
-            email_sent = send_email(
-                recipient_email=user_email,
-                subject="📬 Message from Your Future Self",
-                body=st.session_state["fs_output"],
-                sender_email=st.secrets["email"]["smtp_user"],
-                sender_password=st.secrets["email"]["smtp_password"]
-            )
-            if email_sent:
-                st.success("✅ Sent your future message!")
-            else:
-                st.error("❌ Failed to send email.")
-
-def create_pdf(text):
+def create_pdf(title, body_text):
     buffer = io.BytesIO()
     pdf = pdf_canvas.Canvas(buffer, pagesize=letter)
     width, height = letter
     pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(50, height - 50, "Self Reflection")
+    pdf.drawString(50, height - 50, title)
     pdf.setFont("Helvetica", 10)
     t = pdf.beginText(50, height - 80)
-    for line in text.split("\n"):
-        t.textLine(line)
+    for line in body_text.split("\n"):
+        t.textLine(line.strip())
     pdf.drawText(t)
     pdf.save()
     buffer.seek(0)
