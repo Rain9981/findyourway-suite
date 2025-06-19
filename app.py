@@ -76,6 +76,16 @@ tab_order = [
 
 allowed_tabs = tier_access.get(role, [])
 available_tabs = [tab for tab in tab_order if tab in allowed_tabs and os.path.isdir(tab) and os.path.exists(f"{tab}/{tab}_app.py")]
+# 🔍 Debug Import Check
+tab_modules = {}
+
+for tab in available_tabs:
+    try:
+        mod = importlib.import_module(f"{tab}.{tab}_app")
+        tab_modules[tab] = mod
+        print(f"✅ Loaded tab: {tab}")
+    except Exception as e:
+        print(f"❌ Failed to import tab: {tab} — {e}")
 
 selected = st.sidebar.selectbox("📂 Choose a Tool", available_tabs)
 
