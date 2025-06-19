@@ -71,7 +71,13 @@ def run():
             st.success(insight)
 
             # Save to Sheets
-            save_data("Self Enhancement", [str(datetime.datetime.now()), st.session_state.get("user_role", "guest"), journal_input, insight])
+            save_data("Self Enhancement", {
+                "Timestamp": str(datetime.datetime.now()),
+                "User Role": st.session_state.get("user_role", "guest"),
+                "Journal Entry": journal_input,
+                "AI Insight": insight
+            })
+
 
         except Exception as e:
             st.error(f"GPT Error: {e}")
