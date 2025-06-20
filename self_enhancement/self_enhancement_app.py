@@ -271,3 +271,5 @@ def run():
                         st.error("❌ Email failed to send.")
                 except Exception as e:
                     st.error(f"Email Error: {e}")
+            else:
+                st.warning("⚠️ Please enter a valid email address.")  # ✅ This goes here
