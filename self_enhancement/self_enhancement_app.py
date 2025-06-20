@@ -140,15 +140,25 @@ def run():
             future_reply = response.choices[0].message.content.strip()
             st.success(future_reply)
 
-            if st.button("🎯 What would your future self thank you for today?"):
-                follow_up = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=[
-                        {"role": "system", "content": "You're the user's future self giving them one clear, powerful thing to do today that they'll be thankful for later."},
-                        {"role": "user", "content": "What would you thank me for doing today?"}
-                    ]
-                )
-                st.info(follow_up.choices[0].message.content.strip())
+    # Only show this if a future_input was already processed
+    if "future_reply" in st.session_state:
+        st.markdown("##### 🔄 Optional: What would your future self thank you for today?")
+    
+    if st.button("🎯 Get Thank You Action", key="future_thankyou"):
+        try:
+            follow_up = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You're the user's future self giving them one clear, powerful thing to do today that they'll be thankful for later."},
+                    {"role": "user", "content": "What would you thank me for doing today?"}
+                ]
+            )
+            thank_you = follow_up.choices[0].message.content.strip()
+            st.session_state["future_thank_you"] = thank_you
+            st.success(thank_you)
+        except Exception as e:
+            st.error(f"GPT Error: {e}")
+
 
             if st.button("📄 Export Future Self", key="pdf2"):
                 buffer = io.BytesIO()
@@ -156,17 +166,31 @@ def run():
                 c.drawString(100, 750, "Letter to My Future Self")
                 c.drawString(100, 735, f"Entry: {future_input[:60]}...")
                 c.drawString(100, 720, "Response:")
-                c.drawString(100, 705, future_reply[:80])
+                text_obj = c.beginText(100, 705)
+                for line in future_reply.split("\n"):
+                    text_obj.textLine(line)
+                c.drawText(text_obj)
                 c.save()
                 buffer.seek(0)
-                st.download_button("Download PDF", buffer, file_name="future_self_letter.pdf")
+                st.download_button("📄 Download PDF", buffer, file_name="future_self_letter.pdf", key="download_pdf2")
 
-            if st.button("📧 Email Future Self", key="email2"):
-                send_email("Message from Your Future Self", future_reply)
-                st.info("✅ Sent to your email.")
 
-        except Exception as e:
-            st.error(f"GPT Error: {e}")
+            recipient_email_2 = st.text_input("Enter your email to receive this letter:", key="future_email_input")
+
+            if st.button("📧 Email Future Self", key="email2") and recipient_email_2:
+                email_sent = send_email(
+                    subject="Letter from Your Future Self",
+                    body=future_reply,
+                    recipient_email=recipient_email_2,
+                    sender_email=st.secrets["email"]["smtp_user"],
+                    sender_password=st.secrets["email"]["smtp_password"]
+            )
+            if email_sent:
+                st.success("✅ Sent to your email.")
+            else:
+                st.error("❌ Email failed to send.")
+            except Exception as e:
+                st.error(f"Email Error: {e}")
 
     # --- Legacy Input
     st.markdown("### ✍️ Legacy Self-Enhancement Prompt")
