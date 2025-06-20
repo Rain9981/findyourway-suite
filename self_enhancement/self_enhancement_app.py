@@ -224,7 +224,9 @@ def run():
             )
             insight = response.choices[0].message.content.strip()
             st.success(insight)
-
+        except Exception as e:
+            st.error(f"GPT Error: {e}")
+       
      # Save to Google Sheets with proper dict format
             data_to_save = {
                   "Timestamp": str(datetime.datetime.now()),
