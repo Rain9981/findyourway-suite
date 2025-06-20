@@ -258,12 +258,20 @@ def run():
                 if recipient_email_legacy:
                     email_subject = "Your Legacy Self-Enhancement Insight"
                     email_body = f"Reflection:\n{legacy_input}\n\nAI Insight:\n{insight}"
-                    send_email(email_subject, email_body, recipient_email_legacy)
-                    st.success("✅ Insight emailed successfully.")
+                    email_sent = send_email(
+                        subject=email_subject,
+                        body=email_body,
+                        recipient_email=recipient_email_legacy,
+                        sender_email=st.secrets["email"]["smtp_user"],
+                        sender_password=st.secrets["email"]["smtp_password"]
+                    )
+                    if email_sent:
+                        st.success("✅ Insight emailed successfully.")
+                    else:
+                        st.error("❌ Email failed to send.")
                 else:
                     st.warning("⚠️ Please enter a valid email address.")
-
-        except Exception as e:
-            st.error(f"GPT Error: {e}")
+            except Exception as e:
+                st.error(f"GPT Error: {e}")
 
 
