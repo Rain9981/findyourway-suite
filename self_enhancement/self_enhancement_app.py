@@ -230,8 +230,8 @@ def run():
         except Exception as e:
             st.error(f"GPT Error: {e}")
 
-# --- Show Insight if exists
-if "legacy_insight" in st.session_state:
+    # --- Show Insight if exists
+    if "legacy_insight" in st.session_state:
     insight = st.session_state["legacy_insight"]
     st.markdown("### 💡 Legacy Insight")
     st.success(insight)
