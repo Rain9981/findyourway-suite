@@ -139,6 +139,9 @@ def run():
             )
             future_reply = response.choices[0].message.content.strip()
             st.success(future_reply)
+            st.session_state["future_reply"] = future_reply  # <-- you forgot this line too
+        except Exception as e:
+            st.error(f"GPT Error: {e}")
 
     # Only show this if a future_input was already processed
     if "future_reply" in st.session_state:
