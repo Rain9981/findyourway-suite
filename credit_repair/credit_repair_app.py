@@ -1,82 +1,98 @@
+
 import streamlit as st
 from openai import OpenAI
+from utils.send_email import send_email  # Ensure this import works in your structure
 
-client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+client = OpenAI(api_key=st.secrets["openai_api_key"])
 
 def run():
-    st.set_page_config(page_title="Credit Repair Assistant", layout="wide")
-    st.title("🧾 Credit Repair Assistant")
+    st.set_page_config(page_title="Credit Repair Tool", layout="wide")
+    st.title("📈 Credit Repair & Business Credit Insights")
 
-    # Sidebar Guidance
-    with st.sidebar:
-        st.header("📌 Credit Repair Guidance")
-        st.markdown("""
-        Use this tool to get suggestions for:
-        - Personal credit repair steps
-        - Business credit building tips
-        - Budgeting & debt strategy
-        - Credit score recovery ideas
+    # Sidebar Educational Guide
+    st.sidebar.title("🧠 Credit Coaching Tips")
+    st.sidebar.markdown("""
+    Welcome to your virtual **Credit Repair Coach**.
 
-        🔍 Tips:
-        - Be honest and specific in your description  
-        - Ask for personal or business help  
-        - You can email the results to yourself
+    **What to do here:**
+    - Enter any questions, credit issues, or goals.
+    - Click **Generate AI Suggestions** to get a personalized action plan.
+    - Export results via email if needed.
 
-        ✉️ Only the AI results are emailed (no data saved).
-        """)
+    **Topics You Can Ask About:**
+    - Personal credit repair steps
+    - Business credit building
+    - How to improve score
+    - Secured credit cards
+    - Removing collections or inquiries
+    - Net-30 vendors or DUNS setup
 
-    # User Input
-    st.markdown("### ✍️ What do you need help with?")
-    credit_input = st.text_area("Describe your credit situation or goals (e.g., 'I want to rebuild my personal credit' or 'I need help getting business credit')")
+    **Credit Report Tool:**  
+    👉 [findyourwaynmc.creditmyreport.com](https://findyourwaynmc.creditmyreport.com)
 
-    # GPT Button + Output
-    if st.button("💡 Generate AI Credit Suggestions"):
-        if credit_input.strip() != "":
-            try:
-                with st.spinner("Thinking like a credit coach..."):
-                    prompt = f"""You are a helpful and educated credit advisor. Based on the user's situation below, give step-by-step suggestions for improving their credit — either personal or business (specify which one based on context). Provide actionable steps and educational insight.
+    **Learn More:** Visit [FindYourWayNMC.com](https://findyourwaynmc.com) for credit education, funding tools, and step-by-step support.
+    """)
 
-User Situation: {credit_input}
+    st.markdown("### 💬 What do you need help with?")
+    credit_issue = st.text_area("Describe your credit goals, issues, or questions:", placeholder="e.g. I want to build business credit while fixing old collections on my personal report...")
+
+    if st.button("⚡ Generate AI Suggestions"):
+        if credit_issue.strip():
+            prompt = f"""
+You are a professional credit repair and funding advisor. Based on the user's message, provide a structured plan for both personal and business credit. Include steps for building credit, disputing errors, and financial discipline. Include encouragement.
+
+User input:
+{credit_issue}
+
+Response:
 """
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[{"role": "user", "content": prompt}],
-                        temperature=0.7
-                    )
-                    credit_suggestions = response.choices[0].message.content
-                    st.session_state["credit_ai_output"] = credit_suggestions
-                    st.success("✅ AI Credit Suggestions Generated:")
-                    st.markdown(credit_suggestions)
-            except Exception as e:
-                st.error(f"Error generating suggestions: {e}")
+            response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a top-tier credit repair and business funding strategist."},
+                    {"role": "user", "content": prompt}
+                ],
+                temperature=0.7
+            )
+            ai_suggestion = response.choices[0].message.content
+            st.session_state["credit_ai_response"] = ai_suggestion
+            st.success("✅ Insight generated!")
+            st.markdown("### 🧾 Your AI-Generated Credit Action Plan:")
+            st.write(ai_suggestion)
         else:
-            st.warning("⚠️ Please enter a description first.")
+            st.warning("⚠️ Please enter a credit issue or goal before generating.")
 
-    # Email Export
-    if "credit_ai_output" in st.session_state:
-        st.markdown("### 📤 Email Your AI Suggestions")
-        email_input = st.text_input("Enter your email to receive these suggestions:")
-        if st.button("📧 Send to My Email") and email_input:
+    # Show AI result if it exists
+    if "credit_ai_response" in st.session_state:
+        st.markdown("### 📤 Email Your Plan")
+        email = st.text_input("Enter your email to receive this action plan:", key="credit_email")
+        if st.button("📧 Send to Email", key="send_credit_email") and email:
             try:
                 email_sent = send_email(
-                    subject="Your AI Credit Repair Suggestions",
-                    body=st.session_state["credit_ai_output"],
-                    recipient_email=email_input,
+                    subject="Your Credit Repair Plan",
+                    body=st.session_state["credit_ai_response"],
+                    recipient_email=email,
                     sender_email=st.secrets["email"]["smtp_user"],
                     sender_password=st.secrets["email"]["smtp_password"]
                 )
                 if email_sent:
-                    st.success("✅ Sent to your email.")
+                    st.success("✅ Plan sent to your email.")
                 else:
-                    st.error("❌ Email failed to send.")
+                    st.error("❌ Failed to send email.")
             except Exception as e:
                 st.error(f"Email Error: {e}")
 
-    # Original Credit Repair Tool Button + Link (Preserved)
-    st.markdown("---")
-    st.markdown("### 🔧 Launch Credit Repair Tool")
-    if st.button("🔗 Open Tool"):
-        st.markdown(
-            "[Click here to open the Credit Repair Tool](https://findyourwaynmc.creditmyreport.com)"
-        )
+    st.divider()
 
+    # 🔗 Existing Tool/Button (keep as is)
+    st.markdown("### 🔧 Credit Consultation & Report Link")
+    st.markdown("""
+If you need help pulling your full credit report and scheduling a consultation:
+
+👉 [Click here to visit our trusted portal](https://findyourwaynmc.creditmyreport.com)
+
+Here you can:
+- Pull your **3-bureau** credit report
+- Get personalized help from our team
+- Begin your credit transformation journey
+""")
