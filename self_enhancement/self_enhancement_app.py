@@ -225,16 +225,16 @@ def run():
             insight = response.choices[0].message.content.strip()
             st.success(insight)
 
-            # Save to Google Sheets with proper dict format
+     # Save to Google Sheets with proper dict format
             data_to_save = {
                   "Timestamp": str(datetime.datetime.now()),
                   "Role": st.session_state.get("user_role", "guest"),
                   "Prompt": legacy_input,
-                  "Insight": insight
+                  "Insight": insight           
             }
             save_data("Self Enhancement", data_to_save)
 
-            # PDF Export Button
+     # PDF Export Button
             if st.button("📝 Export to PDF", key="export_legacy_pdf"):
                 buffer = io.BytesIO()
                 c = pdf_canvas.Canvas(buffer, pagesize=letter)
@@ -248,9 +248,9 @@ def run():
                     data=buffer.getvalue(),
                     file_name="legacy_self_enhancement.pdf",
                     mime="application/pdf",
-                )
+                )           
 
-            # --- Email Export Section (Compact Style)
+    # --- Email Export Section (Compact Style)
             st.markdown("#### 📬 Email Insight")
             recipient_email_legacy = st.text_input("Enter your email:", key="email_legacy")
 
@@ -273,4 +273,4 @@ def run():
                     except Exception as e:
                         st.error(f"Email Error: {e}")
                 else:
-                    st.warning("⚠️ Please enter a valid email address.")
+                    st.warning("⚠️ Please enter a valid email address.")            
