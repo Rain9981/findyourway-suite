@@ -1,6 +1,6 @@
 import streamlit as st
 from openai import OpenAI
-from utils.send_email import send_email
+
 
 client = OpenAI(api_key=st.secrets["openai_api_key"])
 
