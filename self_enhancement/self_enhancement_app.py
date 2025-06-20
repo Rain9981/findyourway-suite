@@ -271,7 +271,6 @@ def run():
                         st.error("❌ Email failed to send.")
                 else:
                     st.warning("⚠️ Please enter a valid email address.")
-            except Exception as e:
-                st.error(f"GPT Error: {e}")
+            
 
 
