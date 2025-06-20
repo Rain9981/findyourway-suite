@@ -254,22 +254,23 @@ def run():
             st.markdown("#### 📬 Email Insight")
             recipient_email_legacy = st.text_input("Enter your email:", key="email_legacy")
 
-            if st.button("📤 Email This Insight", key="send_legacy_email") and recipient_email_legacy:
-                try:
-                    email_subject = "Your Legacy Self-Enhancement Insight"
-                    email_body = f"Reflection:\n{legacy_input}\n\nAI Insight:\n{insight}"
-                    email_sent = send_email(
-                        subject=email_subject,
-                        body=email_body,
-                        recipient_email=recipient_email_legacy,
-                        sender_email=st.secrets["email"]["smtp_user"],
-                        sender_password=st.secrets["email"]["smtp_password"]
-                    )
-                    if email_sent:
-                        st.success("✅ Insight emailed successfully.")
-                    else:
-                        st.error("❌ Email failed to send.")
-                except Exception as e:
-                    st.error(f"Email Error: {e}")
-            else:
-                st.warning("⚠️ Please enter a valid email address.")  # ✅ This goes here
+            if st.button("📤 Email This Insight", key="send_legacy_email"):
+                if recipient_email_legacy:
+                    try:
+                        email_subject = "Your Legacy Self-Enhancement Insight"
+                        email_body = f"Reflection:\n{legacy_input}\n\nAI Insight:\n{insight}"
+                        email_sent = send_email(
+                            subject=email_subject,
+                            body=email_body,
+                            recipient_email=recipient_email_legacy,
+                            sender_email=st.secrets["email"]["smtp_user"],
+                            sender_password=st.secrets["email"]["smtp_password"]
+                        )
+                        if email_sent:
+                            st.success("✅ Insight emailed successfully.")
+                        else:
+                            st.error("❌ Email failed to send.")
+                    except Exception as e:
+                        st.error(f"Email Error: {e}")
+                else:
+                    st.warning("⚠️ Please enter a valid email address.")  # ✅ This goes here
