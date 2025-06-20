@@ -250,7 +250,7 @@ def run():
                     mime="application/pdf",
                 )
 
-            # Email Export Section
+            # --- Email Export Section (Compact Style)
             st.markdown("#### 📬 Email Insight")
             recipient_email_legacy = st.text_input("Enter your email:", key="email_legacy")
 
@@ -273,4 +273,4 @@ def run():
                     except Exception as e:
                         st.error(f"Email Error: {e}")
                 else:
-                    st.warning("⚠️ Please enter a valid email address.")  # ✅ This goes here
+                    st.warning("⚠️ Please enter a valid email address.")
