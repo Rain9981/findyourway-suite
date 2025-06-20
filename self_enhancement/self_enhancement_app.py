@@ -212,68 +212,66 @@ def run():
     input_value = default_prompt if st.session_state["self_enhancement_autofill_triggered"] else ""
 
     legacy_input = st.text_area("What area of your self are you improving?", value=input_value, key="legacy_input")
-
-    if st.button("🚀 Run GPT-4o Autofill", key="legacy_run") and legacy_input:
+    
+    # --- GPT Autofill + Insight (Legacy)
+    if st.button("🚀 Run GPT-4o Autofill", key="legacy_gpt"):
+    with st.spinner("Thinking..."):
         try:
-            response = client.chat.completions.create(
+            prompt = f"Reflect on this legacy question and give insight:\n{legacy_input}"
+            completion = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
-                    {
-                        "role": "system",
-                        "content": "You're a mindset strategist helping users reflect on their legacy and long-term life impact. Provide insightful, motivational feedback based on their response.",
-                    },
-                    {
-                        "role": "user",
-                        "content": legacy_input,
-                    },
-                ],
+                    {"role": "system", "content": "You are a wise legacy coach helping someone connect with their long-term impact and legacy."},
+                    {"role": "user", "content": prompt}
+                ]
             )
-            insight = response.choices[0].message.content.strip()
-            st.success(insight)
-
-            # Google Sheets Save
-            save_data("Self Enhancement", {
-                "Prompt Type": "Legacy",
-                "User Input": legacy_input,
-                "AI Insight": insight,
-                "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            })
-
-            # PDF Export
-            pdf_buffer = io.BytesIO()
-            p = pdf_canvas.Canvas(pdf_buffer, pagesize=letter)
-            p.drawString(50, 750, "Legacy Self-Enhancement Insight")
-            p.drawString(50, 730, f"Reflection: {legacy_input}")
-            p.drawString(50, 710, f"AI Insight: {insight}")
-            p.showPage()
-            p.save()
-            pdf_buffer.seek(0)
-            st.download_button(
-                label="📄 Download PDF",
-                data=pdf_buffer,
-                file_name="legacy_self_enhancement_insight.pdf",
-                mime="application/pdf"
-            )
-
-            # Email Export Section
-            st.markdown("#### 📬 Email Insight")
-            recipient_email_legacy = st.text_input("Enter your email:", key="email_legacy")
-
-            if st.button("📤 Email This Insight", key="send_legacy_email") and recipient_email_legacy:
-                email_subject = "Your Legacy Self-Enhancement Insight"
-                email_body = f"Reflection:\n{legacy_input}\n\nAI Insight:\n{insight}"
-                email_sent = send_email(
-                    subject=email_subject,
-                    body=email_body,
-                    recipient_email=recipient_email_legacy,
-                    sender_email=st.secrets["email"]["smtp_user"],
-                    sender_password=st.secrets["email"]["smtp_password"]
-                )
-                if email_sent:
-                    st.success("✅ Insight emailed successfully.")
-                else:
-                    st.error("❌ Email failed to send.")
+            insight = completion.choices[0].message.content.strip()
+            st.session_state["legacy_insight"] = insight
         except Exception as e:
             st.error(f"GPT Error: {e}")
 
-           
+# --- Show Insight if exists
+if "legacy_insight" in st.session_state:
+    insight = st.session_state["legacy_insight"]
+    st.markdown("### 💡 Legacy Insight")
+    st.success(insight)
+
+    # --- Export: PDF
+    if st.button("📄 Download PDF", key="legacy_pdf"):
+        buffer = io.BytesIO()
+        c = pdf_canvas.Canvas(buffer, pagesize=letter)
+        text = c.beginText(50, 750)
+        text.setFont("Helvetica", 12)
+        text.textLines(f"Legacy Self-Reflection:\n{legacy_input}\n\nGPT Insight:\n{insight}")
+        c.drawText(text)
+        c.save()
+        buffer.seek(0)
+        st.download_button(
+            label="📥 Download Legacy Insight PDF",
+            data=buffer,
+            file_name="legacy_insight.pdf",
+            mime="application/pdf",
+        )
+
+    # --- Export: Email
+    st.markdown("#### 📬 Email Insight")
+    recipient_email_legacy = st.text_input("Enter your email:", key="email_legacy")
+
+    if st.button("📤 Email This Insight", key="send_legacy_email") and recipient_email_legacy:
+        try:
+            email_subject = "Your Legacy Self-Enhancement Insight"
+            email_body = f"Reflection:\n{legacy_input}\n\nAI Insight:\n{insight}"
+            email_sent = send_email(
+                subject=email_subject,
+                body=email_body,
+                recipient_email=recipient_email_legacy,
+                sender_email=st.secrets["email"]["smtp_user"],
+                sender_password=st.secrets["email"]["smtp_password"]
+            )
+            if email_sent:
+                st.success("✅ Insight emailed successfully.")
+            else:
+                st.error("❌ Email failed to send.")
+        except Exception as e:
+            st.error(f"Email Error: {e}")
+    
