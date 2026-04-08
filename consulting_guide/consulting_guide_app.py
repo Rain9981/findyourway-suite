@@ -140,8 +140,8 @@ def run():
             "benefit": "Helps you see what is really shaping your decisions and where your life is heading if nothing changes.",
             "best_time": "Use when you feel stuck, unclear, or know you are not fully stepping into your potential.",
             "pairs_with": "Self Enhancement, Strategy Designer, Business Genius Engine",
-            "recommendation": "Best matched with FYW Self-Enhancement programs and Legacy Architecture for deeper identity and structural       	    transformation."
-        }
+            "recommendation": "Best matched with FYW Self-Enhancement programs and Legacy Architecture for deeper identity and structural transformation."       	    
+        },
         {
             "name": "📝 Client Intake",
             "purpose": "Captures business details, goals, and challenges to create a tailored consulting path.",
