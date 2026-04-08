@@ -20,16 +20,26 @@ def get_workbook():
 
 def get_or_create_worksheet(sheet_tab="General", rows="100", cols="20"):
     workbook = get_workbook()
+
+    # First try exact lookup
     try:
-        worksheet = workbook.worksheet(sheet_tab)
+        return workbook.worksheet(sheet_tab)
     except gspread.exceptions.WorksheetNotFound:
-        worksheet = workbook.add_worksheet(title=sheet_tab, rows=rows, cols=cols)
-    return worksheet
+        pass
+
+    # If not found, try creating it
+    try:
+        return workbook.add_worksheet(title=sheet_tab, rows=rows, cols=cols)
+    except gspread.exceptions.APIError:
+        # If Google says it already exists, fetch all worksheets and match by title
+        for ws in workbook.worksheets():
+            if ws.title.strip().lower() == sheet_tab.strip().lower():
+                return ws
+        raise
 
 def save_data(role, data_dict, sheet_tab="General"):
     worksheet = get_or_create_worksheet(sheet_tab)
 
-    # Add headers only if the worksheet is empty
     if not worksheet.get_all_values():
         headers = ["Timestamp", "Role"] + list(data_dict.keys())
         worksheet.append_row(headers)
@@ -53,6 +63,7 @@ def get_sheet_data(sheet_tab="Users"):
 def create_users_tab_if_missing():
     """
     Ensures the Users tab exists with the exact header row needed.
+    Never crashes if the sheet already exists.
     """
     worksheet = get_or_create_worksheet("Users", rows="200", cols="10")
     current_values = worksheet.get_all_values()
@@ -71,15 +82,14 @@ def create_users_tab_if_missing():
         worksheet.append_row(expected_headers)
     else:
         first_row = current_values[0]
-        if first_row != expected_headers:
-            # Only set headers if the sheet looks empty except for formatting
-            if len(current_values) == 0 or all(cell == "" for cell in first_row):
-                worksheet.update("A1:G1", [expected_headers])
+        normalized_first_row = [str(x).strip().lower() for x in first_row]
+        normalized_expected = [str(x).strip().lower() for x in expected_headers]
+
+        # Only write headers if the first row is blank
+        if all(str(cell).strip() == "" for cell in first_row):
+            worksheet.update("A1:G1", [expected_headers])
 
 def create_user_record(username, password, role, created_by="admin", notes=""):
-    """
-    Adds a user directly to the Users tab without the Timestamp/Role wrapper.
-    """
     create_users_tab_if_missing()
     worksheet = get_or_create_worksheet("Users", rows="200", cols="10")
 
