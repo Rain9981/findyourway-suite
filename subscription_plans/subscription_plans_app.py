@@ -57,6 +57,7 @@ def run():
         - Brand Positioning
         - Strategy Designer
         - Credit Repair
+        - Future Self Deep State
         """
     )
 
@@ -81,6 +82,7 @@ def run():
         - KPI Tracker
         - Forecasting
         - Credit Repair
+        - Future Self Deep State
         """
     )
 
@@ -110,6 +112,7 @@ def run():
         - Forecasting
         - Canvas
         - Credit Repair
+        - Future Self Deep State
         """
     )
 
@@ -159,6 +162,7 @@ def run():
         ["Homepage", "✅", "✅", "✅", "✅"],
         ["Subscription Plans", "✅", "✅", "✅", "✅"],
         ["Consulting Guide", "✅", "✅", "✅", "✅"],
+        ["Future Self Deep State", "✅", "✅", "✅", "✅"],
         ["Client Intake", "🔒", "🔒", "🔒", "✅"],
         ["Brand Positioning", "✅", "✅", "✅", "✅"],
         ["Business Development", "🔒", "✅", "✅", "✅"],
