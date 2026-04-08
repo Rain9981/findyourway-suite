@@ -61,48 +61,124 @@ st.sidebar.markdown(f"🧾 **Logged in as:** `{role.capitalize()}`")
 
 # ✅ Tier Access Dictionary
 tier_access = {
-    "basic": ["homepage", "client_intake", "subscription_plans", "consulting_guide", "credit_repair"],
+    "basic": [
+        "homepage",
+        "subscription_plans",
+        "consulting_guide",
+        "brand_positioning",
+        "strategy_designer",
+        "credit_repair"
+    ],
 
     "elite": [
-        "homepage", "client_intake", "subscription_plans", "consulting_guide",
-        "brand_positioning", "business_development", "lead_generation", "marketing_hub",
-        "strategy_designer", "operations_audit", "growth", "kpi_tracker", "forecasting", "credit_repair"
+        "homepage",
+        "subscription_plans",
+        "consulting_guide",
+        "brand_positioning",
+        "business_development",
+        "strategy_designer",
+        "lead_generation",
+        "marketing_hub",
+        "operations_audit",
+        "growth",
+        "kpi_tracker",
+        "forecasting",
+        "credit_repair"
     ],
 
     "premium": [
-        "homepage", "client_intake", "subscription_plans", "consulting_guide",
-        "brand_positioning", "business_development", "lead_generation", "marketing_hub",
-        "strategy_designer", "operations_audit", "growth", "kpi_tracker", "forecasting",
-        "crm_manager", "crm_dashboard", "crm", "email_marketing", "credit_repair",
-        "marketing_planner", "sentiment_analysis", "canvas", "oops_audit"
+        "homepage",
+        "subscription_plans",
+        "consulting_guide",
+        "brand_positioning",
+        "business_development",
+        "strategy_designer",
+        "lead_generation",
+        "marketing_hub",
+        "marketing_planner",
+        "email_marketing",
+        "sentiment_analysis",
+        "operations_audit",
+        "oops_audit",
+        "growth",
+        "kpi_tracker",
+        "forecasting",
+        "canvas",
+        "credit_repair"
     ],
 
     "admin": [
-        "homepage", "client_intake", "subscription_plans", "consulting_guide",
-        "brand_positioning", "business_development", "lead_generation", "marketing_hub",
-        "strategy_designer", "business_model_canvas", "operations_audit", "self_enhancement",
-        "growth", "kpi_tracker", "forecasting", "crm_manager", "crm_dashboard", "crm",
-        "email_marketing", "credit_repair", "marketing_planner", "sentiment_analysis",
-        "canvas", "oops_audit", "business_genius_engine", "mastermind_analyzer",
+        "homepage",
+        "subscription_plans",
+        "consulting_guide",
+        "client_intake",
+        "brand_positioning",
+        "business_development",
+        "strategy_designer",
+        "business_model_canvas",
+        "business_genius_engine",
+        "lead_generation",
+        "marketing_hub",
+        "marketing_planner",
+        "email_marketing",
+        "sentiment_analysis",
+        "mastermind_analyzer",
+        "operations_audit",
+        "oops_audit",
+        "self_enhancement",
+        "growth",
+        "kpi_tracker",
+        "forecasting",
+        "credit_repair",
+        "canvas",
+        "crm_manager",
+        "crm",
+        "crm_dashboard",
 
-        # 🔥 NEW ADMIN TOOL
+        # 🔥 keep admin tool
         "admin_user_manager"
     ]
 }
-
 # ✅ Tab Visibility Logic
 tab_order = [
-    "homepage", "client_intake", "subscription_plans", "consulting_guide",
-    "brand_positioning", "business_development", "lead_generation", "marketing_hub",
-    "strategy_designer", "business_model_canvas", "operations_audit", "self_enhancement",
-    "growth", "kpi_tracker", "forecasting", "crm_manager", "crm_dashboard", "crm",
-    "email_marketing", "credit_repair", "marketing_planner", "sentiment_analysis",
-    "canvas", "oops_audit", "business_genius_engine", "mastermind_analyzer",
+    "homepage",
+    "subscription_plans",
+    "consulting_guide",
+    "client_intake",
 
-    # 🔥 NEW ADMIN TOOL
+    "brand_positioning",
+    "business_development",
+    "strategy_designer",
+    "business_model_canvas",
+    "business_genius_engine",
+
+    "lead_generation",
+    "marketing_hub",
+    "marketing_planner",
+    "email_marketing",
+    "sentiment_analysis",
+    "mastermind_analyzer",
+
+    "operations_audit",
+    "oops_audit",
+
+    "self_enhancement",
+
+    "growth",
+    "kpi_tracker",
+    "forecasting",
+
+    "credit_repair",
+    "canvas",
+
+    # CRM FLOW (admin only)
+    "crm_manager",
+    "crm",
+    "crm_dashboard",
+
+    # 🔥 keep admin tool visible
     "admin_user_manager"
 ]
-
 allowed_tabs = tier_access.get(role, [])
 
 available_tabs = [
