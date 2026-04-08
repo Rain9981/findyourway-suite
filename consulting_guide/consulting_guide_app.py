@@ -4,13 +4,14 @@ import io
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
 
+
 def run():
     st.title("📘 Consulting Guide")
     st.markdown(
         """
-        Use this guide to move through the Find Your Way Consulting Suite in a clean, strategic order.
-        Each tool below explains **what it does, why it matters, when to use it, what it pairs with next,**
-        and which **FYW program, module, or service** it naturally connects to.
+        Use this guide to move through the Find Your Way Consulting Suite in a clean and strategic order.
+        Each tool below explains what it does, why it matters, when to use it, what it pairs with next,
+        and which FYW program, module, or service it naturally connects to.
         """
     )
 
@@ -18,7 +19,7 @@ def run():
     st.sidebar.markdown(
         """
         - Follow the numbered flow if you want the smoothest consulting journey.
-        - Use the “Where Should I Start?” section if you already know what you need help with.
+        - Use the "Where Should I Start?" section if you already know what kind of help you need.
         - Check the FYW Recommendation line to connect each tool to the right program or service.
         """
     )
@@ -48,7 +49,7 @@ def run():
         "Forecasting",
         "Credit Repair",
         "Canvas",
-        "CRM Manager / CRM / CRM Dashboard (Admin or managed workflow)"
+        "CRM Manager / CRM / CRM Dashboard"
     ]
 
     for i, step in enumerate(flow_steps, start=1):
@@ -58,7 +59,7 @@ def run():
 
     st.markdown("## 2️⃣ Where Should I Start?")
     start_points = {
-        "I’m brand new and need direction": [
+        "I am brand new and need direction": [
             "Homepage",
             "Subscription Plans",
             "Consulting Guide",
@@ -136,7 +137,7 @@ def run():
         {
             "name": "📝 Client Intake",
             "purpose": "Captures business details, goals, and challenges to create a tailored consulting path.",
-            "benefit": "Ensures the strategy is based on the client’s real needs instead of assumptions.",
+            "benefit": "Ensures the strategy is based on the client's real needs instead of assumptions.",
             "best_time": "Use early before deeper strategy work begins.",
             "pairs_with": "Brand Positioning, Business Development, Strategy Designer",
             "recommendation": "Pairs with FYW intake, consulting diagnosis, and service matching."
@@ -193,7 +194,7 @@ def run():
             "name": "📢 Marketing Hub",
             "purpose": "Develops campaign concepts, promotional ideas, and content direction.",
             "benefit": "Improves visibility and strengthens brand communication.",
-            "best_time": "Use when you’re ready to promote more intentionally.",
+            "best_time": "Use when you are ready to promote more intentionally.",
             "pairs_with": "Lead Generation, Marketing Planner, Sentiment Analysis",
             "recommendation": "Pairs with FYW Marketing services, campaign support, and promotional strategy."
         },
@@ -316,7 +317,7 @@ def run():
             "best_time": "Use when monitoring multiple clients or ongoing consulting relationships.",
             "pairs_with": "CRM Manager, CRM",
             "recommendation": "Best matched with FYW backend management, consulting oversight, and relationship intelligence."
-        },
+        }
     ]
 
     for tool in tool_guide:
@@ -392,7 +393,7 @@ def run():
 
             if completed:
                 for step in completed:
-                    text.textLine(f"• {step}")
+                    text.textLine(f"- {step}")
             else:
                 text.textLine("No steps were selected.")
 
@@ -408,4 +409,4 @@ def run():
                 buffer,
                 file_name="consulting_session_report.pdf",
                 mime="application/pdf"
-            )nsulting_session.pdf")
+            )
