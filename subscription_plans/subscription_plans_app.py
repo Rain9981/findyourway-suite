@@ -146,6 +146,7 @@ def run():
         - KPI Tracker
         - Forecasting
         - Credit Repair
+        - Future Self Deep State
         - Canvas
         - CRM Manager
         - CRM
