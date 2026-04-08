@@ -44,6 +44,7 @@ def run():
         "Operations Audit",
         "Oops Audit",
         "Self Enhancement",
+    "Future Self Deep State",
         "Growth",
         "KPI Tracker",
         "Forecasting",
