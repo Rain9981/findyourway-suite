@@ -67,6 +67,7 @@ tier_access = {
         "consulting_guide",
         "brand_positioning",
         "strategy_designer",
+        "future_self_deep_state",
         "credit_repair"
     ],
 
@@ -80,6 +81,7 @@ tier_access = {
         "lead_generation",
         "marketing_hub",
         "operations_audit",
+        "future_self_deep_state",
         "growth",
         "kpi_tracker",
         "forecasting",
@@ -100,6 +102,7 @@ tier_access = {
         "sentiment_analysis",
         "operations_audit",
         "oops_audit",
+        "future_self_deep_state",
         "growth",
         "kpi_tracker",
         "forecasting",
@@ -126,6 +129,7 @@ tier_access = {
         "operations_audit",
         "oops_audit",
         "self_enhancement",
+        "future_self_deep_state",
         "growth",
         "kpi_tracker",
         "forecasting",
@@ -163,7 +167,7 @@ tab_order = [
     "oops_audit",
 
     "self_enhancement",
-
+    "future_self_deep_state",
     "growth",
     "kpi_tracker",
     "forecasting",
