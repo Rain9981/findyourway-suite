@@ -36,6 +36,7 @@ def run():
         "Business Model Canvas",
         "Business Genius Engine",
         "Lead Generation",
+    "Network Builder",
         "Marketing Hub",
         "Marketing Planner",
         "Email Marketing",
@@ -75,6 +76,7 @@ def run():
             "Lead Generation",
             "Marketing Hub",
             "Marketing Planner",
+            "Network Builder",
             "Email Marketing"
         ],
         "I need stronger strategy and decision-making": [
@@ -98,6 +100,7 @@ def run():
         "I want mindset and leadership support too": [
             "Self Enhancement",
             "Strategy Designer",
+            "Future Self Deep State",
             "Growth"
         ]
     }
@@ -199,6 +202,14 @@ def run():
             "pairs_with": "Marketing Hub, Email Marketing, Marketing Planner",
             "recommendation": "Best matched with FYW Lead Generation and growth-focused marketing services."
         },
+        {
+            "name": "🌐 Network Builder",
+            "purpose": "Helps you think through who you need to connect with, why those relationships matter, and how to approach them strategically.",
+            "benefit": "Strengthens your ability to build useful partnerships, referral paths, and growth-supporting relationships.",
+            "best_time": "Use when you are trying to expand your reach, build strategic relationships, or create stronger networking direction.",
+            "pairs_with": "Business Development, Lead Generation, Growth",
+            "recommendation": "Best matched with FYW InterNetwork growth, relationship-building strategy, and collaborative expansion support."
+},
         {
             "name": "📢 Marketing Hub",
             "purpose": "Develops campaign concepts, promotional ideas, and content direction.",
@@ -361,6 +372,7 @@ def run():
             "Strategy Designer Used",
             "Business Development Reviewed",
             "Lead Generation Plan Built",
+            "Network Builder",
             "Marketing Hub Used",
             "Marketing Planner Reviewed",
             "Email Marketing Drafted",

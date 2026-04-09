@@ -56,6 +56,7 @@ def run():
         - Consulting Guide
         - Brand Positioning
         - Strategy Designer
+        - Network Builder
         - Credit Repair
         - Future Self Deep State
         """
@@ -76,6 +77,7 @@ def run():
         - Business Development
         - Strategy Designer
         - Lead Generation
+        - Network Builder
         - Marketing Hub
         - Operations Audit
         - Growth
@@ -101,6 +103,7 @@ def run():
         - Business Development
         - Strategy Designer
         - Lead Generation
+        - Network Builder
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
@@ -134,6 +137,7 @@ def run():
         - Business Model Canvas
         - Business Genius Engine
         - Lead Generation
+        - Network Builder
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
@@ -171,6 +175,7 @@ def run():
         ["Business Model Canvas", "🔒", "🔒", "🔒", "✅"],
         ["Business Genius Engine", "🔒", "🔒", "🔒", "✅"],
         ["Lead Generation", "🔒", "✅", "✅", "✅"],
+        ["Network Builder", "✅", "✅", "✅", "✅"],
         ["Marketing Hub", "🔒", "✅", "✅", "✅"],
         ["Marketing Planner", "🔒", "🔒", "✅", "✅"],
         ["Email Marketing", "🔒", "🔒", "✅", "✅"],
