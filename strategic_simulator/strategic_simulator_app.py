@@ -109,23 +109,39 @@ def run():
 **Pro Tip:** The more specific the scenario, the more realistic and useful the simulation.
 """)
 
-    if st.button("✨ Suggest Simulation Example"):
-        st.session_state["strategic_simulator_autofill"] = {
-            "scenario_input": "If we lower our product prices by 10%, how might it affect revenue, customer loyalty, perceived value, and repeat purchases over the next 90 days?",
-            "business_stage": "Growing",
-            "priority_focus": "Revenue Growth",
-            "risk_tolerance": "Moderate",
-            "optional_notes": "The business wants more customers but does not want to weaken brand positioning."
-        }
+    # Session state defaults
+    if "scenario_input" not in st.session_state:
+        st.session_state["scenario_input"] = ""
 
-    def autofill_value(field, default=""):
-        return st.session_state.get("strategic_simulator_autofill", {}).get(field, default)
+    if "business_stage" not in st.session_state:
+        st.session_state["business_stage"] = "Growing"
+
+    if "priority_focus" not in st.session_state:
+        st.session_state["priority_focus"] = "Revenue Growth"
+
+    if "risk_tolerance" not in st.session_state:
+        st.session_state["risk_tolerance"] = "Moderate"
+
+    if "optional_notes" not in st.session_state:
+        st.session_state["optional_notes"] = ""
+
+    if st.button("✨ Suggest Simulation Example"):
+        st.session_state["scenario_input"] = (
+            "If we lower our product prices by 10%, how might it affect revenue, "
+            "customer loyalty, perceived value, and repeat purchases over the next 90 days?"
+        )
+        st.session_state["business_stage"] = "Growing"
+        st.session_state["priority_focus"] = "Revenue Growth"
+        st.session_state["risk_tolerance"] = "Moderate"
+        st.session_state["optional_notes"] = (
+            "The business wants more customers but does not want to weaken brand positioning."
+        )
 
     st.markdown("### 📥 Strategic Simulation Input")
 
     scenario_input = st.text_area(
         "Describe your business scenario to simulate:",
-        value=autofill_value("scenario_input"),
+        key="scenario_input",
         height=160,
         placeholder="Example: If I raise prices, add a service, hire help, change positioning, start ads, or shift target audience, what is likely to happen?"
     )
@@ -143,29 +159,39 @@ def run():
     ]
     risk_options = ["Low", "Moderate", "High"]
 
+    # Safety check in case old session values are invalid
+    if st.session_state["business_stage"] not in stage_options:
+        st.session_state["business_stage"] = "Growing"
+
+    if st.session_state["priority_focus"] not in focus_options:
+        st.session_state["priority_focus"] = "Revenue Growth"
+
+    if st.session_state["risk_tolerance"] not in risk_options:
+        st.session_state["risk_tolerance"] = "Moderate"
+
     with col1:
         business_stage = st.selectbox(
             "Business Stage",
             stage_options,
-            index=stage_options.index(autofill_value("business_stage", "Growing")) if autofill_value("business_stage", "Growing") in stage_options else 1
+            key="business_stage"
         )
 
         priority_focus = st.selectbox(
             "Priority Focus",
             focus_options,
-            index=focus_options.index(autofill_value("priority_focus", "Revenue Growth")) if autofill_value("priority_focus", "Revenue Growth") in focus_options else 0
+            key="priority_focus"
         )
 
     with col2:
         risk_tolerance = st.selectbox(
             "Risk Tolerance",
             risk_options,
-            index=risk_options.index(autofill_value("risk_tolerance", "Moderate")) if autofill_value("risk_tolerance", "Moderate") in risk_options else 1
+            key="risk_tolerance"
         )
 
     optional_notes = st.text_area(
         "Optional Notes",
-        value=autofill_value("optional_notes"),
+        key="optional_notes",
         height=120,
         placeholder="Anything else that matters: competition, budget, timing, current customer behavior, internal concerns, etc."
     )
