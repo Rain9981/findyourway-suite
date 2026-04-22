@@ -79,6 +79,8 @@ def run():
         - Lead Generation
         - Network Builder
         - Marketing Hub
+        - AI CMO Engine
+        - Strategic Simulator
         - Operations Audit
         - Growth
         - KPI Tracker
@@ -107,6 +109,8 @@ def run():
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
+        - AI CMO Engine
+        - Strategic Simulator
         - Sentiment Analysis
         - Operations Audit
         - Oops Audit
@@ -141,6 +145,8 @@ def run():
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
+        - AI CMO Engine
+        - Strategic Simulator
         - Sentiment Analysis
         - Mastermind Analyzer
         - Operations Audit
@@ -179,6 +185,8 @@ def run():
         ["Marketing Hub", "🔒", "✅", "✅", "✅"],
         ["Marketing Planner", "🔒", "🔒", "✅", "✅"],
         ["Email Marketing", "🔒", "🔒", "✅", "✅"],
+        ["AI CMO Engine", "🔒", "✅", "✅", "✅"],
+        ["Strategic Simulator", "🔒", "✅", "✅", "✅"],
         ["Sentiment Analysis", "🔒", "🔒", "✅", "✅"],
         ["Mastermind Analyzer", "🔒", "🔒", "🔒", "✅"],
         ["Operations Audit", "🔒", "✅", "✅", "✅"],

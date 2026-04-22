@@ -40,6 +40,8 @@ def run():
         "Marketing Hub",
         "Marketing Planner",
         "Email Marketing",
+    "AI CMO Engine",
+    "Strategice Simulator",
         "Sentiment Analysis",
         "Mastermind Analyzer",
         "Operations Audit",
@@ -241,6 +243,22 @@ def run():
             "best_time": "Use before finalizing campaigns, copy, or communication pieces.",
             "pairs_with": "Marketing Hub, Email Marketing, Mastermind Analyzer",
             "recommendation": "Best matched with FYW messaging refinement, brand voice, and communication improvement work."
+        },
+        {
+            "name": "🧠 AI CMO Engine",
+            "purpose": "Analyzes your business position and delivers a structured growth strategy across visibility, lead generation, and conversion.",
+            "benefit": "Gives you clear direction on what to focus on next, eliminating guesswork and improving decision-making.",
+            "best_time": "Use after building your business foundation when you need clarity on how to grow and scale.",
+            "pairs_with": "Business Genius Engine, Marketing Hub, Strategy Designer, Growth",
+            "recommendation": "Best matched with FYW strategic growth planning, marketing optimization, and high-level consulting          direction."
+        },
+        {
+            "name": "♟️ Strategic Simulator",
+            "purpose": "Simulates business decisions to predict possible outcomes, risks, and opportunities before execution.",
+            "benefit": "Helps you make smarter decisions by understanding potential results without risking time or resources.",
+            "best_time": "Use when considering new strategies, pricing changes, campaigns, or business moves.",
+            "pairs_with": "AI CMO Engine, Strategy Designer, Forecasting, KPI Tracker",
+            "recommendation": "Best matched with FYW decision-making, scenario planning, and risk assessment strategy work."
         },
         {
             "name": "🧠 Mastermind Analyzer",
