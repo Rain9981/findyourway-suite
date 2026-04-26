@@ -345,7 +345,7 @@ def run():
             "missing": "Professional service providers with strong branding, follow-up, customer experience, and package-based offers.",
             "complaints": "People complain about unreliable contractors, poor communication, inconsistent service, weak professionalism, and businesses not following up.",
             "underserved": "Elderly homeowners, busy working families, small businesses, landlords, property managers, and local entrepreneurs.",
-            "opportunity_preferences": "Local service business, consulting / coaching, creative business, technology / AI, and community-based business",
+            "opportunity_preferences": "Local service business, Consulting / coaching, Creative business, Technology / AI, Community-based business",
             "weekly_time": "10–20 hours per week",
             "startup_budget": "$500–$1,500",
             "risk_level": "Moderate risk",
