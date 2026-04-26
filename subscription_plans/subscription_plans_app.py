@@ -86,6 +86,7 @@ def run():
         - KPI Tracker
         - Forecasting
         - Credit Repair
+        - Find Where You Win
         - Future Self Deep State
         """
     )
@@ -119,6 +120,7 @@ def run():
         - Forecasting
         - Canvas
         - Credit Repair
+        - Find Where You Win
         - Future Self Deep State
         """
     )
@@ -156,6 +158,7 @@ def run():
         - KPI Tracker
         - Forecasting
         - Credit Repair
+        - Find Where You Win
         - Future Self Deep State
         - Canvas
         - CRM Manager
@@ -196,6 +199,7 @@ def run():
         ["KPI Tracker", "🔒", "✅", "✅", "✅"],
         ["Forecasting", "🔒", "✅", "✅", "✅"],
         ["Credit Repair", "✅", "✅", "✅", "✅"],
+        ["Find Where You Win™", "❌", "✅", "✅", "✅"],
         ["Canvas", "🔒", "🔒", "✅", "✅"],
         ["CRM Manager", "🔒", "🔒", "🔒", "✅"],
         ["CRM", "🔒", "🔒", "🔒", "✅"],

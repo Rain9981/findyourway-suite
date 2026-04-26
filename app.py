@@ -90,6 +90,7 @@ tier_access = {
         "kpi_tracker",
         "forecasting",
         "credit_repair"
+        "find_where_you_win"
     ],
 
     "premium": [
@@ -114,7 +115,8 @@ tier_access = {
         "kpi_tracker",
         "forecasting",
         "canvas",
-        "credit_repair"
+        "credit_repair",
+        "find_where_you_win"
     ],
 
     "admin": [
@@ -144,6 +146,7 @@ tier_access = {
         "kpi_tracker",
         "forecasting",
         "credit_repair",
+        "find_where_you_win",
         "canvas",
         "crm_manager",
         "crm",
@@ -192,6 +195,7 @@ tab_order = [
     "crm_manager",
     "crm",
     "crm_dashboard",
+    "find_where_you_win",
 
     # 🔥 keep admin tool visible
     "admin_user_manager"

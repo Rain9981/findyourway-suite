@@ -52,6 +52,7 @@ def run():
         "KPI Tracker",
         "Forecasting",
         "Credit Repair",
+    "find_where_you_win",
         "Canvas",
         "CRM Manager / CRM / CRM Dashboard"
     ]
@@ -268,6 +269,14 @@ def run():
             "pairs_with": "Business Genius Engine, Strategy Designer, Sentiment Analysis",
             "recommendation": "Pairs with FYW advanced planning, decision support, and strategic advisory services."
         },
+        {
+            "name": "🌍 Find Where You Win™",
+            "purpose": "Analyzes your location, skills, resources, and market awareness to identify real business opportunities, income  pathways, and competitive gaps.",
+            "benefit": "Helps you understand exactly where you have the highest probability of success instead of guessing or following  saturated ideas.",
+            "best_time": "Use after defining your goal or anytime you want to explore realistic income opportunities and market direction.",
+            "pairs_with": "Strategy Designer, Business Development, AI CMO Engine, Network Builder",
+            "recommendation": "Use before building or scaling to ensure your direction is aligned with real market demand and your personal strengths."
+},
         {
             "name": "🔍 Operations Audit",
             "purpose": "Looks for workflow issues, inefficiencies, and system weaknesses.",
