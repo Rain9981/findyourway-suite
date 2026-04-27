@@ -85,11 +85,44 @@ Relevant FYW tools / ecosystem:
 """
 
 
+def create_pdf_buffer(title, output):
+    pdf_buffer = io.BytesIO()
+    pdf = pdf_canvas.Canvas(pdf_buffer, pagesize=letter)
+    width, height = letter
+
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(50, height - 40, title)
+
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(50, height - 60, f"Generated on {datetime.date.today().strftime('%B %d, %Y')}")
+
+    text = pdf.beginText(50, height - 90)
+    text.setFont("Helvetica", 10)
+
+    y_position = height - 90
+    for line in output.split("\n"):
+        if y_position < 50:
+            pdf.drawText(text)
+            pdf.showPage()
+            text = pdf.beginText(50, height - 50)
+            text.setFont("Helvetica", 10)
+            y_position = height - 50
+        text.textLine(line[:110])
+        y_position -= 12
+
+    pdf.drawText(text)
+    pdf.save()
+    pdf_buffer.seek(0)
+    return pdf_buffer
+
+
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
     st.title("♟️ Strategic Simulator")
-    st.caption("Simulate business decisions, pressure-test possible outcomes, and get a smarter next move before acting.")
+    st.caption(
+        "Simulate business decisions, pressure-test possible outcomes, and get a smarter next move before acting."
+    )
 
     st.sidebar.header("💡 Strategic Simulator Guide")
     st.sidebar.markdown("""
@@ -97,19 +130,19 @@ def run():
 - simulates possible business outcomes
 - helps pressure-test decisions before acting
 - reveals upside, downside, and hidden variables
+- scores strategy strength using key business indicators
 - recommends smarter next steps
 
-**Instructions:**
-1. Click **✨ Suggest Simulation Example** if you want a sample.
-2. Describe the business scenario you want to test.
-3. Select the stage, focus, and risk level.
-4. Click **🚀 Run Strategic Simulation**.
-5. Download the report if needed.
+**Simulation Modes:**
+1. **Scenario Simulation** — describe a decision and receive a strategic AI breakdown.
+2. **Strategic Score Simulation** — use sliders to calculate a directional strategy score.
 
-**Pro Tip:** The more specific the scenario, the more realistic and useful the simulation.
+**Pro Tip:** Use Scenario Simulation for deeper thinking. Use Strategic Score Simulation for quick decision pressure-testing.
 """)
 
+    # -------------------------
     # Session state defaults
+    # -------------------------
     if "scenario_input" not in st.session_state:
         st.session_state["scenario_input"] = ""
 
@@ -125,156 +158,235 @@ def run():
     if "optional_notes" not in st.session_state:
         st.session_state["optional_notes"] = ""
 
-    if st.button("✨ Suggest Simulation Example"):
-        st.session_state["scenario_input"] = (
-            "If we lower our product prices by 10%, how might it affect revenue, "
-            "customer loyalty, perceived value, and repeat purchases over the next 90 days?"
-        )
-        st.session_state["business_stage"] = "Growing"
-        st.session_state["priority_focus"] = "Revenue Growth"
-        st.session_state["risk_tolerance"] = "Moderate"
-        st.session_state["optional_notes"] = (
-            "The business wants more customers but does not want to weaken brand positioning."
-        )
+    if "strategic_simulator_result" not in st.session_state:
+        st.session_state["strategic_simulator_result"] = ""
 
-    st.markdown("### 📥 Strategic Simulation Input")
-
-    scenario_input = st.text_area(
-        "Describe your business scenario to simulate:",
-        key="scenario_input",
-        height=160,
-        placeholder="Example: If I raise prices, add a service, hire help, change positioning, start ads, or shift target audience, what is likely to happen?"
+    mode = st.radio(
+        "Choose Simulation Mode",
+        ["Scenario Simulation", "Strategic Score Simulation"],
+        horizontal=True
     )
 
-    col1, col2 = st.columns(2)
+    # -------------------------
+    # MODE 1: GPT Scenario Simulation
+    # -------------------------
+    if mode == "Scenario Simulation":
+        if st.button("✨ Suggest Simulation Example"):
+            st.session_state["scenario_input"] = (
+                "If we lower our product prices by 10%, how might it affect revenue, "
+                "customer loyalty, perceived value, and repeat purchases over the next 90 days?"
+            )
+            st.session_state["business_stage"] = "Growing"
+            st.session_state["priority_focus"] = "Revenue Growth"
+            st.session_state["risk_tolerance"] = "Moderate"
+            st.session_state["optional_notes"] = (
+                "The business wants more customers but does not want to weaken brand positioning."
+            )
 
-    stage_options = ["Startup", "Growing", "Established", "Scaling"]
-    focus_options = [
-        "Revenue Growth",
-        "Lead Generation",
-        "Brand Positioning",
-        "Operational Efficiency",
-        "Customer Retention",
-        "Market Expansion"
-    ]
-    risk_options = ["Low", "Moderate", "High"]
+        st.markdown("### 📥 Strategic Simulation Input")
 
-    # Safety check in case old session values are invalid
-    if st.session_state["business_stage"] not in stage_options:
-        st.session_state["business_stage"] = "Growing"
-
-    if st.session_state["priority_focus"] not in focus_options:
-        st.session_state["priority_focus"] = "Revenue Growth"
-
-    if st.session_state["risk_tolerance"] not in risk_options:
-        st.session_state["risk_tolerance"] = "Moderate"
-
-    with col1:
-        business_stage = st.selectbox(
-            "Business Stage",
-            stage_options,
-            key="business_stage"
+        scenario_input = st.text_area(
+            "Describe your business scenario to simulate:",
+            key="scenario_input",
+            height=160,
+            placeholder="Example: If I raise prices, add a service, hire help, change positioning, start ads, or shift target audience, what is likely to happen?"
         )
 
-        priority_focus = st.selectbox(
-            "Priority Focus",
-            focus_options,
-            key="priority_focus"
+        col1, col2 = st.columns(2)
+
+        stage_options = ["Startup", "Growing", "Established", "Scaling"]
+        focus_options = [
+            "Revenue Growth",
+            "Lead Generation",
+            "Brand Positioning",
+            "Operational Efficiency",
+            "Customer Retention",
+            "Market Expansion"
+        ]
+        risk_options = ["Low", "Moderate", "High"]
+
+        if st.session_state["business_stage"] not in stage_options:
+            st.session_state["business_stage"] = "Growing"
+
+        if st.session_state["priority_focus"] not in focus_options:
+            st.session_state["priority_focus"] = "Revenue Growth"
+
+        if st.session_state["risk_tolerance"] not in risk_options:
+            st.session_state["risk_tolerance"] = "Moderate"
+
+        with col1:
+            business_stage = st.selectbox(
+                "Business Stage",
+                stage_options,
+                key="business_stage"
+            )
+
+            priority_focus = st.selectbox(
+                "Priority Focus",
+                focus_options,
+                key="priority_focus"
+            )
+
+        with col2:
+            risk_tolerance = st.selectbox(
+                "Risk Tolerance",
+                risk_options,
+                key="risk_tolerance"
+            )
+
+        optional_notes = st.text_area(
+            "Optional Notes",
+            key="optional_notes",
+            height=120,
+            placeholder="Anything else that matters: competition, budget, timing, current customer behavior, internal concerns, etc."
         )
 
-    with col2:
-        risk_tolerance = st.selectbox(
-            "Risk Tolerance",
-            risk_options,
-            key="risk_tolerance"
-        )
+        if st.button("🚀 Run Strategic Simulation"):
+            if not scenario_input.strip():
+                st.warning("⚠️ Please enter a scenario before running the simulation.")
+            else:
+                try:
+                    with st.spinner("Simulating strategic outcomes..."):
+                        prompt = build_strategic_simulator_prompt(
+                            scenario_input=scenario_input,
+                            business_stage=business_stage,
+                            priority_focus=priority_focus,
+                            risk_tolerance=risk_tolerance,
+                            optional_notes=optional_notes,
+                        )
 
-    optional_notes = st.text_area(
-        "Optional Notes",
-        key="optional_notes",
-        height=120,
-        placeholder="Anything else that matters: competition, budget, timing, current customer behavior, internal concerns, etc."
-    )
+                        response = client.chat.completions.create(
+                            model="gpt-4o",
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": (
+                                        "You are Rain Intelligence in strategic simulation mode: sharp, executive, "
+                                        "realistic, and commercially intelligent."
+                                    )
+                                },
+                                {"role": "user", "content": prompt}
+                            ],
+                            temperature=0.8,
+                        )
 
-    if st.button("🚀 Run Strategic Simulation"):
-        if not scenario_input.strip():
-            st.warning("⚠️ Please enter a scenario before running the simulation.")
+                        output = response.choices[0].message.content
+                        st.session_state["strategic_simulator_result"] = output
+
+                        try:
+                            save_data("Strategic_Simulator", {
+                                "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                                "User_Role": st.session_state.get("user_role", "guest"),
+                                "Mode": "Scenario Simulation",
+                                "Scenario_Input": scenario_input,
+                                "Business_Stage": business_stage,
+                                "Priority_Focus": priority_focus,
+                                "Risk_Tolerance": risk_tolerance,
+                                "Optional_Notes": optional_notes,
+                                "Simulation_Result": output,
+                            })
+                        except Exception as save_error:
+                            st.warning(f"Simulation generated, but Google Sheets save had an issue: {save_error}")
+
+                    st.success("✅ Strategic simulation generated.")
+                    st.subheader("♟️ Strategic Simulation Report")
+                    st.markdown(output)
+
+                except Exception as e:
+                    st.error(f"❌ GPT Error: {e}")
+
+    # -------------------------
+    # MODE 2: Slider-Based Strategic Score
+    # -------------------------
+    elif mode == "Strategic Score Simulation":
+        st.markdown("### 📊 Strategic Score Input")
+        st.caption("Use this quick model to pressure-test strategy strength using growth, retention, and margin indicators.")
+
+        market_growth = st.slider("Expected Market Growth (%)", -20, 100, 10)
+        customer_retention = st.slider("Customer Retention Rate (%)", 0, 100, 80)
+        operating_margin = st.slider("Operating Margin (%)", 0, 100, 25)
+
+        score = (market_growth * 0.4) + (customer_retention * 0.3) + (operating_margin * 0.3)
+
+        st.metric("Strategic Score", f"{score:.2f}")
+
+        if score > 70:
+            recommendation = "Aggressive Growth Strategy"
+            st.success(f"Recommendation: {recommendation}")
+            interpretation = (
+                "The indicators suggest strong growth conditions. The business may be positioned to push expansion, "
+                "increase visibility, test bigger campaigns, or move more aggressively if capacity can support it."
+            )
+        elif score > 50:
+            recommendation = "Balanced Strategy"
+            st.info(f"Recommendation: {recommendation}")
+            interpretation = (
+                "The indicators suggest a balanced growth posture. The business should continue improving visibility, "
+                "retention, and margins while avoiding overextension."
+            )
         else:
+            recommendation = "Cost Optimization Focus"
+            st.warning(f"Recommendation: {recommendation}")
+            interpretation = (
+                "The indicators suggest caution. The business may need to strengthen margins, retention, or market demand "
+                "before pushing aggressive growth."
+            )
+
+        summary = f"""
+1. Strategic Score Summary
+- Expected Market Growth: {market_growth}%
+- Customer Retention Rate: {customer_retention}%
+- Operating Margin: {operating_margin}%
+- Strategic Score: {score:.2f}
+
+2. Recommendation
+- {recommendation}
+
+3. Interpretation
+- {interpretation}
+
+4. Next Best Actions
+- Review whether your market demand is strong enough to support your next move.
+- Strengthen retention before scaling if customer loyalty is weak.
+- Improve margin before expanding if profitability is too thin.
+- Use the AI CMO Engine for deeper growth direction.
+- Use Scenario Simulation to pressure-test one specific business decision.
+
+5. Final Simulation Insight
+- A strong strategy is not based on excitement alone. It should be supported by market movement, customer stability, and enough margin to survive execution pressure.
+"""
+
+        st.subheader("📈 Strategic Score Summary")
+        st.markdown(summary)
+
+        st.session_state["strategic_simulator_result"] = summary
+
+        if st.button("💾 Save Strategic Score Result"):
             try:
-                with st.spinner("Simulating strategic outcomes..."):
-                    prompt = build_strategic_simulator_prompt(
-                        scenario_input=scenario_input,
-                        business_stage=business_stage,
-                        priority_focus=priority_focus,
-                        risk_tolerance=risk_tolerance,
-                        optional_notes=optional_notes,
-                    )
+                save_data("Strategic_Simulator", {
+                    "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "User_Role": st.session_state.get("user_role", "guest"),
+                    "Mode": "Strategic Score Simulation",
+                    "Expected_Market_Growth": market_growth,
+                    "Customer_Retention": customer_retention,
+                    "Operating_Margin": operating_margin,
+                    "Strategic_Score": round(score, 2),
+                    "Recommendation": recommendation,
+                    "Simulation_Result": summary,
+                })
+                st.success("✅ Strategic score saved.")
+            except Exception as save_error:
+                st.warning(f"Strategic score generated, but Google Sheets save had an issue: {save_error}")
 
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": "You are Rain Intelligence in strategic simulation mode: sharp, executive, realistic, and commercially intelligent."
-                            },
-                            {"role": "user", "content": prompt}
-                        ],
-                        temperature=0.8,
-                    )
-
-                    output = response.choices[0].message.content
-                    st.session_state["strategic_simulator_result"] = output
-
-                    try:
-                        save_data("Strategic_Simulator", {
-                            "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "User_Role": st.session_state.get("user_role", "guest"),
-                            "Scenario_Input": scenario_input,
-                            "Business_Stage": business_stage,
-                            "Priority_Focus": priority_focus,
-                            "Risk_Tolerance": risk_tolerance,
-                            "Optional_Notes": optional_notes,
-                            "Simulation_Result": output,
-                        })
-                    except Exception as save_error:
-                        st.warning(f"Simulation generated, but Google Sheets save had an issue: {save_error}")
-
-                st.success("✅ Strategic simulation generated.")
-                st.subheader("♟️ Strategic Simulation Report")
-                st.markdown(output)
-
-            except Exception as e:
-                st.error(f"❌ GPT Error: {e}")
-
-    if "strategic_simulator_result" in st.session_state:
-        output = st.session_state["strategic_simulator_result"]
-
-        pdf_buffer = io.BytesIO()
-        pdf = pdf_canvas.Canvas(pdf_buffer, pagesize=letter)
-        width, height = letter
-
-        pdf.setFont("Helvetica-Bold", 14)
-        pdf.drawString(50, height - 40, "Strategic Simulation Report")
-        pdf.setFont("Helvetica", 10)
-        pdf.drawString(50, height - 60, f"Generated on {datetime.date.today().strftime('%B %d, %Y')}")
-
-        text = pdf.beginText(50, height - 90)
-        text.setFont("Helvetica", 10)
-
-        y_position = height - 90
-        for line in output.split("\n"):
-            if y_position < 50:
-                pdf.drawText(text)
-                pdf.showPage()
-                text = pdf.beginText(50, height - 50)
-                text.setFont("Helvetica", 10)
-                y_position = height - 50
-            text.textLine(line)
-            y_position -= 12
-
-        pdf.drawText(text)
-        pdf.save()
-        pdf_buffer.seek(0)
+    # -------------------------
+    # PDF Export
+    # -------------------------
+    if st.session_state.get("strategic_simulator_result"):
+        st.divider()
+        pdf_buffer = create_pdf_buffer(
+            "Strategic Simulation Report",
+            st.session_state["strategic_simulator_result"]
+        )
 
         st.download_button(
             "📄 Download Strategic Simulation Report as PDF",
