@@ -1,83 +1,218 @@
 import streamlit as st
-import datetime
-import json
 import io
-import gspread
+import datetime
 from openai import OpenAI
+from backend.google_sheets import save_data
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-from oauth2client.service_account import ServiceAccountCredentials
-from gspread.exceptions import WorksheetNotFound
+
+
+def build_marketing_hub_prompt(product_service, audience, campaign_goal, brand_message, offer_angle, channels, tone, optional_notes):
+    return f"""
+Act as Rain Intelligence in marketing strategy mode: persuasive, clear, audience-aware, and brand-focused.
+
+Return this exact structure:
+
+1. Campaign Snapshot
+2. Audience Psychology
+3. Core Message Angle
+4. Offer Positioning
+5. Content Themes
+6. Channel Strategy
+7. Hook Ideas
+8. Messaging Risks to Avoid
+9. FYW Tool Match
+10. Next Best Actions
+11. Final Marketing Insight
+
+Product / Service:
+{product_service}
+
+Target Audience:
+{audience}
+
+Campaign Goal:
+{campaign_goal}
+
+Current Brand Message:
+{brand_message}
+
+Offer Angle:
+{offer_angle}
+
+Marketing Channels:
+{channels}
+
+Tone:
+{tone}
+
+Optional Notes:
+{optional_notes if optional_notes.strip() else "None provided"}
+
+Relevant FYW tools:
+- Brand Positioning
+- Lead Generation
+- Email Marketing
+- Sentiment Analysis
+- AI CMO Engine
+- Marketing Planner
+- Strategic Simulator
+"""
+
+
+def create_pdf_buffer(title, output):
+    buffer = io.BytesIO()
+    pdf = pdf_canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(50, height - 40, title)
+    pdf.setFont("Helvetica", 10)
+    pdf.drawString(50, height - 60, f"Generated on {datetime.date.today().strftime('%B %d, %Y')}")
+
+    text = pdf.beginText(50, height - 90)
+    text.setFont("Helvetica", 10)
+    y = height - 90
+
+    for line in output.split("\n"):
+        if y < 50:
+            pdf.drawText(text)
+            pdf.showPage()
+            text = pdf.beginText(50, height - 50)
+            text.setFont("Helvetica", 10)
+            y = height - 50
+        text.textLine(line[:110])
+        y -= 12
+
+    pdf.drawText(text)
+    pdf.save()
+    buffer.seek(0)
+    return buffer
+
 
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
+
     st.title("📣 Marketing Hub")
-    st.markdown("Refine your campaign ideas and brand messaging.")
+    st.caption("Shape your campaign message, content angle, audience psychology, and brand direction.")
 
-    st.sidebar.header("💡 Marketing Strategy Tips")
+    st.sidebar.header("💡 Marketing Hub Guide")
     st.sidebar.markdown("""
-    - Describe your product, audience, or campaign.
-    - GPT will give creative direction or messaging ideas.
-    - Save results or export as PDF.
-    """)
+**What this tool does:**
+- refines campaign ideas
+- sharpens brand messaging
+- creates content themes and hooks
+- helps position an offer before planning execution
 
-    default_prompt = "We're launching a natural skincare line and need content ideas for Instagram and email."
+**Best use:**
+Use before Marketing Planner, Email Marketing, or Lead Generation.
 
-    if "marketing_hub_autofill_triggered" not in st.session_state:
-        st.session_state["marketing_hub_autofill_triggered"] = False
+**Pro Tip:** The Hub helps you decide what the campaign should say before you decide exactly when and where to publish it.
+""")
 
-    if st.button("✨ Autofill Example", key="marketing_hub_autofill"):
-        st.session_state["marketing_hub_autofill_triggered"] = True
+    defaults = {
+        "mh_product_service": "",
+        "mh_audience": "",
+        "mh_campaign_goal": "",
+        "mh_brand_message": "",
+        "mh_offer_angle": "",
+        "mh_channels": "",
+        "mh_optional_notes": "",
+        "mh_tone": "Professional / Persuasive",
+        "marketing_hub_result": "",
+    }
 
-    input_value = default_prompt if st.session_state["marketing_hub_autofill_triggered"] else ""
+    for k, v in defaults.items():
+        if k not in st.session_state:
+            st.session_state[k] = v
 
-    user_input = st.text_area("Describe your product and goal:", value=input_value, key="marketing_hub_input")
+    if st.button("✨ Autofill Example"):
+        st.session_state["mh_product_service"] = "Find Your Way Elite Access"
+        st.session_state["mh_audience"] = "Small business owners and entrepreneurs who need structure, clarity, and growth tools."
+        st.session_state["mh_campaign_goal"] = "Promote Elite access and show why it is the best starting point for serious builders."
+        st.session_state["mh_brand_message"] = "Find Your Way helps people move from scattered ideas to structured growth."
+        st.session_state["mh_offer_angle"] = "Unlock strategy, AI tools, and execution guidance without guessing what to do next."
+        st.session_state["mh_channels"] = "Website, email, social media, InterNetwork page, and direct outreach."
+        st.session_state["mh_tone"] = "Professional / Persuasive"
+        st.session_state["mh_optional_notes"] = "Campaign should feel premium, clear, and action-driven."
 
-    if st.button("🚀 Run GPT-4o Strategy", key="marketing_hub_run") and user_input:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You're a brand marketing strategist. Give campaign ideas and brand messaging tips."},
-                    {"role": "user", "content": user_input}
-                ]
-            )
-            result = response.choices[0].message.content.strip()
-            st.session_state["marketing_hub_result"] = result
-            st.subheader("📊 GPT-Generated Marketing Plan")
-            st.success(result)
+    st.markdown("### 📥 Marketing Hub Input")
 
-            # Save to Google Sheets
-            scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-            creds = json.loads(st.secrets["google_sheets"]["service_account"])
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
-            gs_client = gspread.authorize(credentials)
-            sheet = gs_client.open_by_key(st.secrets["google_sheets"]["sheet_id"])
+    product_service = st.text_area("Product / Service", key="mh_product_service", height=90)
+    audience = st.text_area("Target Audience", key="mh_audience", height=90)
+    campaign_goal = st.text_area("Campaign Goal", key="mh_campaign_goal", height=90)
+    brand_message = st.text_area("Current Brand Message", key="mh_brand_message", height=90)
+    offer_angle = st.text_area("Offer Angle", key="mh_offer_angle", height=90)
+    channels = st.text_area("Marketing Channels", key="mh_channels", height=90)
+
+    tone = st.selectbox(
+        "Tone",
+        [
+            "Professional / Persuasive",
+            "Warm / Relatable",
+            "Luxury / Premium",
+            "Bold / Direct",
+            "Educational / Helpful",
+            "Visionary / Inspirational"
+        ],
+        key="mh_tone"
+    )
+
+    optional_notes = st.text_area("Optional Notes", key="mh_optional_notes", height=90)
+
+    if st.button("🚀 Generate Marketing Strategy"):
+        required = [product_service.strip(), audience.strip(), campaign_goal.strip(), offer_angle.strip()]
+        if not all(required):
+            st.warning("⚠️ Please complete the main marketing fields before generating.")
+        else:
             try:
-                ws = sheet.worksheet("Marketing Hub")
-            except WorksheetNotFound:
-                ws = sheet.add_worksheet(title="Marketing Hub", rows="100", cols="20")
-                ws.append_row(["Timestamp", "User Role", "Input", "Marketing Plan"])
-            ws.append_row([
-                str(datetime.datetime.now()),
-                st.session_state.get("user_role", "guest"),
-                user_input,
-                result
-            ])
-            st.info("✅ Saved to Google Sheets.")
+                with st.spinner("Generating marketing strategy..."):
+                    prompt = build_marketing_hub_prompt(
+                        product_service, audience, campaign_goal, brand_message,
+                        offer_angle, channels, tone, optional_notes
+                    )
 
-            if st.session_state.get("user_role", "guest") == "admin":
-                if st.button("📄 Export to PDF", key="marketing_hub_pdf"):
-                    buffer = io.BytesIO()
-                    c = pdf_canvas.Canvas(buffer, pagesize=letter)
-                    c.drawString(100, 750, "Marketing Hub Output")
-                    c.drawString(100, 730, f"Input: {user_input[:90]}")
-                    text = c.beginText(100, 710)
-                    for line in result.splitlines():
-                        text.textLine(line[:100])
-                    c.drawText(text)
-                    c.save()
-                    buffer.seek(0)
-                    st.download_button("Download PDF", buffer, file_name="marketing_plan.pdf")
-        except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
+                    response = client.chat.completions.create(
+                        model="gpt-4o",
+                        messages=[
+                            {"role": "system", "content": "You are Rain Intelligence in marketing strategy mode: clear, persuasive, audience-aware, and brand-focused."},
+                            {"role": "user", "content": prompt}
+                        ],
+                        temperature=0.8,
+                    )
+
+                    output = response.choices[0].message.content
+                    st.session_state["marketing_hub_result"] = output
+
+                    try:
+                        save_data("Marketing_Hub", {
+                            "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "User_Role": st.session_state.get("user_role", "guest"),
+                            "Product_Service": product_service,
+                            "Audience": audience,
+                            "Campaign_Goal": campaign_goal,
+                            "Brand_Message": brand_message,
+                            "Offer_Angle": offer_angle,
+                            "Channels": channels,
+                            "Tone": tone,
+                            "Optional_Notes": optional_notes,
+                            "Marketing_Result": output,
+                        })
+                    except Exception as save_error:
+                        st.warning(f"Generated, but Google Sheets save had an issue: {save_error}")
+
+                st.success("✅ Marketing strategy generated.")
+                st.subheader("📣 Marketing Hub Strategy")
+                st.markdown(output)
+
+            except Exception as e:
+                st.error(f"❌ GPT Error: {e}")
+
+    if st.session_state.get("marketing_hub_result"):
+        st.divider()
+        pdf_buffer = create_pdf_buffer("Marketing Hub Strategy Report", st.session_state["marketing_hub_result"])
+        st.download_button("📄 Download Marketing Hub Report", pdf_buffer, file_name="Marketing_Hub_Report.pdf")
+
+
+if __name__ == "__main__":
+    run()
