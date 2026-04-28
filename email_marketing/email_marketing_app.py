@@ -1,92 +1,82 @@
 import streamlit as st
-import datetime
-import json
 import io
-import gspread
+import datetime
 from openai import OpenAI
-from reportlab.pdfgen import canvas as pdf_canvas
-from reportlab.lib.pagesizes import letter
-from oauth2client.service_account import ServiceAccountCredentials
-from gspread.exceptions import WorksheetNotFound
+from backend.google_sheets import save_data
+
+
+def build_email_prompt(
+    audience,
+    goal,
+    offer,
+    tone,
+    email_type,
+    optional_notes,
+):
+    return f"""
+Act as Rain Intelligence in conversion-focused email marketing mode.
+
+Return:
+
+1. Subject Line Options
+2. Opening Hook
+3. Email Body
+4. Call To Action
+5. Follow-Up Idea
+
+Audience: {audience}
+Goal: {goal}
+Offer: {offer}
+Tone: {tone}
+Email Type: {email_type}
+Notes: {optional_notes}
+"""
+
 
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-    st.title("📬 Email Marketing")
-    st.markdown("Craft or refine marketing emails using GPT and save/export your results.")
+    st.title("📬 Email Marketing V2")
+    st.caption("Create high-converting marketing emails.")
 
-    st.sidebar.header("💡 Email Marketing Guide")
-    st.sidebar.markdown("""
-    - Describe your campaign or paste a rough email.
-    - Use GPT to improve your writing and tone.
-    - Save to Sheets or export to PDF if you're an admin.
-    """)
+    if "email_result" not in st.session_state:
+        st.session_state["email_result"] = ""
 
-    default_prompt = "Promote our new virtual coaching program to past leads in a compelling email."
+    if st.button("✨ Autofill Example"):
+        st.session_state.update({
+            "email_audience": "Past leads",
+            "email_goal": "Drive conversions",
+            "email_offer": "Coaching program",
+            "email_tone": "Persuasive",
+            "email_type": "Promotional",
+            "email_notes": "Warm but direct"
+        })
 
-    if "email_marketing_autofill_triggered" not in st.session_state:
-        st.session_state["email_marketing_autofill_triggered"] = False
+    audience = st.text_area("Audience", key="email_audience")
+    goal = st.text_area("Goal", key="email_goal")
+    offer = st.text_area("Offer", key="email_offer")
 
-    if st.button("✨ Autofill Example", key="email_marketing_autofill"):
-        st.session_state["email_marketing_autofill_triggered"] = True
+    col1, col2 = st.columns(2)
 
-    input_value = default_prompt if st.session_state["email_marketing_autofill_triggered"] else ""
+    with col1:
+        tone = st.selectbox("Tone", ["Persuasive", "Warm", "Urgent", "Professional"], key="email_tone")
 
-    email_input = st.text_area("Describe your email campaign:", value=input_value, key="email_marketing_input")
+    with col2:
+        email_type = st.selectbox("Type", ["Promotional", "Follow-Up", "Welcome", "Re-engagement"], key="email_type")
 
-    if st.button("🚀 Generate Email with GPT-4o", key="email_marketing_run") and email_input:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You're an expert email marketer. Generate or refine a promotional email from this input."},
-                    {"role": "user", "content": email_input}
-                ]
-            )
-            result = response.choices[0].message.content.strip()
-            st.session_state["email_marketing_result"] = result
+    optional_notes = st.text_area("Notes", key="email_notes")
 
-            # ✅ Display result
-            st.subheader("📨 Your AI-Generated Email")
-            st.success(result)
+    if st.button("🚀 Generate Email"):
+        prompt = build_email_prompt(audience, goal, offer, tone, email_type, optional_notes)
 
-            # ✅ Save to Google Sheets
-            try:
-                scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-                creds = json.loads(st.secrets["google_sheets"]["service_account"])
-                credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
-                client_gsheets = gspread.authorize(credentials)
-                sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
-                try:
-                    ws = sheet.worksheet("Email Marketing")
-                except WorksheetNotFound:
-                    ws = sheet.add_worksheet(title="Email Marketing", rows="100", cols="20")
-                    ws.append_row(["Timestamp", "User Role", "Input", "GPT Result"])
-                ws.append_row([
-                    str(datetime.datetime.now()),
-                    st.session_state.get("user_role", "guest"),
-                    email_input,
-                    result
-                ])
-                st.info("✅ Saved to Google Sheets.")
-            except Exception as e:
-                st.warning(f"⚠️ Google Sheets not connected: {e}")
+        response = client.chat.completions.create(
+            model="gpt-4o",
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-            # ✅ PDF Export (Admin Only)
-            if st.session_state.get("user_role", "guest") == "admin":
-                if st.button("📄 Export to PDF", key="email_marketing_pdf"):
-                    buffer = io.BytesIO()
-                    c = pdf_canvas.Canvas(buffer, pagesize=letter)
-                    c.drawString(100, 750, "Email Marketing Campaign")
-                    c.drawString(100, 730, f"Original Input: {email_input[:90]}")
-                    c.drawString(100, 710, "GPT Result:")
-                    text = c.beginText(100, 695)
-                    for line in result.splitlines():
-                        text.textLine(line[:100])
-                    c.drawText(text)
-                    c.save()
-                    buffer.seek(0)
-                    st.download_button("Download PDF", buffer, file_name="email_campaign.pdf")
+        output = response.choices[0].message.content
+        st.session_state["email_result"] = output
 
-        except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
+        save_data("Email_Marketing", {"Result": output})
+
+        st.success(output)
