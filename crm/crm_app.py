@@ -1,97 +1,144 @@
 import streamlit as st
-import datetime
-import json
 import io
-import gspread
+import datetime
 from openai import OpenAI
+from backend.google_sheets import save_data
 from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
-from oauth2client.service_account import ServiceAccountCredentials
-from gspread.exceptions import WorksheetNotFound
+
+
+def build_crm_prompt(client_name, notes, stage, goal, urgency, optional_notes):
+    return f"""
+Act as Rain Intelligence in CRM intelligence mode.
+
+Analyze this client interaction and return:
+
+1. Client Snapshot
+2. Client Intent Level (Hot / Warm / Cold)
+3. Key Concerns or Objections
+4. Opportunity Level
+5. Risk of Losing Client
+6. Recommended Next Move
+7. Suggested Message to Send
+8. Follow-Up Strategy
+9. Revenue Potential
+10. FYW Tool Match
+11. Final Insight
+
+Client Name:
+{client_name}
+
+Client Stage:
+{stage}
+
+Session Notes:
+{notes}
+
+Goal:
+{goal}
+
+Urgency:
+{urgency}
+
+Additional Context:
+{optional_notes if optional_notes.strip() else "None"}
+"""
+
+
+def create_pdf(title, client_name, notes, output):
+    buffer = io.BytesIO()
+    c = pdf_canvas.Canvas(buffer, pagesize=letter)
+
+    c.drawString(100, 750, title)
+    c.drawString(100, 730, f"Client: {client_name}")
+
+    text = c.beginText(100, 710)
+    for line in notes.split("\n"):
+        text.textLine(line[:100])
+    c.drawText(text)
+
+    insight_text = c.beginText(100, 600)
+    for line in output.split("\n"):
+        insight_text.textLine(line[:100])
+    c.drawText(insight_text)
+
+    c.save()
+    buffer.seek(0)
+    return buffer
+
 
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-    st.title("🧠 CRM Insights")
-    st.markdown("Paste in notes from a client session to receive smart AI feedback.")
+    st.title("🧠 CRM Intelligence Engine")
+    st.caption("Analyze client interactions and turn them into strategic actions and revenue opportunities.")
 
-    st.sidebar.header("💡 CRM Insights Guide")
+    st.sidebar.header("💡 CRM Intelligence Guide")
     st.sidebar.markdown("""
-    - Use this to analyze or summarize your client interactions.
-    - Add client name and session notes.
-    - GPT will extract insights and suggestions.
-    - Admins can export results to PDF.
-    """)
+**What this tool does:**
+- analyzes client conversations
+- detects intent, objections, and opportunities
+- recommends next actions
+- improves conversion and retention
 
-    default_prompt = "Client was unsure about pricing. They liked the service but hesitant about monthly commitment."
+**Pro Tip:** Every client note is data. This turns that data into decisions.
+""")
 
-    if "crm_insights_autofill_triggered" not in st.session_state:
-        st.session_state["crm_insights_autofill_triggered"] = False
+    if "crm_result" not in st.session_state:
+        st.session_state["crm_result"] = ""
 
-    if st.button("✨ Autofill Example", key="crm_insights_autofill"):
-        st.session_state["crm_insights_autofill_triggered"] = True
+    if st.button("✨ Autofill Example"):
+        st.session_state["crm_name"] = "John Smith"
+        st.session_state["crm_notes"] = "Client likes the service but hesitant about pricing and commitment."
+        st.session_state["crm_stage"] = "Lead"
+        st.session_state["crm_goal"] = "Convert to paying client"
+        st.session_state["crm_urgency"] = "Moderate"
+        st.session_state["crm_optional"] = "Wants flexibility"
 
-    input_value = default_prompt if st.session_state["crm_insights_autofill_triggered"] else ""
+    client_name = st.text_input("Client Name", key="crm_name")
+    notes = st.text_area("Session Notes", key="crm_notes", height=120)
 
-    client_name = st.text_input("Client Name:", key="crm_insights_name")
-    session_notes = st.text_area("Paste session notes:", value=input_value, key="crm_insights_input")
+    col1, col2 = st.columns(2)
 
-    if st.button("🚀 Analyze Notes with GPT", key="crm_insights_run") and session_notes:
-        try:
-            response = client.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a business consultant who provides insights based on CRM session notes."},
-                    {"role": "user", "content": session_notes}
-                ]
-            )
-            insights = response.choices[0].message.content.strip()
-            st.session_state["crm_insights_result"] = insights
-            st.success(insights)
-        except Exception as e:
-            st.error(f"❌ GPT Error: {e}")
+    with col1:
+        stage = st.selectbox("Client Stage", ["Lead", "Active", "Inactive"], key="crm_stage")
 
-        # Save to Google Sheets
-        try:
-            scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-            creds = json.loads(st.secrets["google_sheets"]["service_account"])
-            credentials = ServiceAccountCredentials.from_json_keyfile_dict(creds, scope)
-            client_gsheets = gspread.authorize(credentials)
-            sheet = client_gsheets.open_by_key(st.secrets["google_sheets"]["sheet_id"])
+    with col2:
+        urgency = st.selectbox("Urgency", ["Low", "Moderate", "High"], key="crm_urgency")
 
-            try:
-                ws = sheet.worksheet("CRM Insights")
-            except WorksheetNotFound:
-                ws = sheet.add_worksheet(title="CRM Insights", rows="100", cols="20")
-                ws.append_row(["Timestamp", "Client Name", "Notes", "Insights"])
+    goal = st.text_area("Goal with this client", key="crm_goal")
+    optional_notes = st.text_area("Optional Notes", key="crm_optional")
 
-            ws.append_row([
-                str(datetime.datetime.now()),
-                client_name,
-                session_notes,
-                insights
-            ])
-            st.info("✅ Saved to Google Sheets.")
-        except Exception as e:
-            st.warning(f"⚠️ Google Sheets not connected: {e}")
+    if st.button("🚀 Analyze Client"):
+        if not notes.strip():
+            st.warning("Enter notes first.")
+        else:
+            with st.spinner("Analyzing client..."):
+                prompt = build_crm_prompt(client_name, notes, stage, goal, urgency, optional_notes)
 
-        # Admin PDF Export
-        if st.session_state.get("user_role", "guest") == "admin":
-            if st.button("📄 Export to PDF", key="crm_insights_pdf"):
-                buffer = io.BytesIO()
-                c = pdf_canvas.Canvas(buffer, pagesize=letter)
-                c.drawString(100, 750, "CRM Insight Report")
-                c.drawString(100, 735, f"Client: {client_name}")
-                c.drawString(100, 715, "Notes:")
-                text = c.beginText(100, 700)
-                for line in session_notes.splitlines():
-                    text.textLine(line[:100])
-                c.drawText(text)
-                c.drawString(100, 650, "GPT Insights:")
-                insight_text = c.beginText(100, 635)
-                for line in insights.splitlines():
-                    insight_text.textLine(line[:100])
-                c.drawText(insight_text)
-                c.save()
-                buffer.seek(0)
-                st.download_button("Download PDF", buffer, file_name=f"{client_name}_insights_report.pdf")
+                response = client.chat.completions.create(
+                    model="gpt-4o",
+                    messages=[
+                        {"role": "system", "content": "You are Rain Intelligence in CRM strategy mode."},
+                        {"role": "user", "content": prompt}
+                    ]
+                )
+
+                output = response.choices[0].message.content
+                st.session_state["crm_result"] = output
+
+                save_data("CRM_Insights_V2", {
+                    "Client": client_name,
+                    "Notes": notes,
+                    "Result": output
+                })
+
+                st.success(output)
+
+    if st.session_state["crm_result"]:
+        pdf = create_pdf("CRM Report", client_name, notes, st.session_state["crm_result"])
+        st.download_button("📄 Download Report", pdf, file_name="crm_report.pdf")
+
+
+if __name__ == "__main__":
+    run()
