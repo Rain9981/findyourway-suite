@@ -32,6 +32,7 @@ def run():
         "Client Intake",
         "Brand Positioning",
         "Business Development",
+    "Offer Innovation Engine",
         "Strategy Designer",
         "Business Model Canvas",
         "Business Genius Engine",
@@ -40,6 +41,7 @@ def run():
         "Marketing Hub",
         "Marketing Planner",
         "Email Marketing",
+    "Campaign Engine",
     "AI CMO Engine",
     "Strategice Simulator",
         "Sentiment Analysis",
@@ -236,6 +238,22 @@ def run():
             "best_time": "Use after lead strategy and campaign direction are in place.",
             "pairs_with": "Lead Generation, Marketing Planner, Sentiment Analysis",
             "recommendation": "Pairs with FYW Email Campaign services and nurture-based marketing support."
+        },
+        {
+            "name": "📢 Campaign Engine",
+            "purpose": "Creates full campaign assets including 21-day content plans, social copy, paid ads, video ideas, and lead magnet  ideas.",
+            "benefit": "Helps users move from marketing strategy into ready-to-use campaign execution.",
+            "best_time": "Use after Marketing Hub and Marketing Planner when the campaign direction is clear.",
+            "pairs_with": "Marketing Hub, Marketing Planner, Email Marketing, Lead Generation, AI CMO Engine",
+            "recommendation": "Best matched with FYW campaign creation, paid ad preparation, lead generation, and content execution work."
+        },
+        {
+            "name": "💡 Offer Innovation Engine",
+            "purpose": "Generates new services, premium packages, add-ons, digital products, courses, and recurring revenue ideas.",
+            "benefit": "Helps users increase profit potential by turning skills and existing services into stronger offers.",
+            "best_time": "Use when a business needs new revenue ideas, stronger packages, or modern service expansion.",
+            "pairs_with": "Business Genius Engine, Business Development, AI CMO Engine, Strategic Simulator, Growth",
+            "recommendation": "Best matched with FYW offer development, service packaging, revenue expansion, and business model improvement work."
         },
         {
             "name": "💬 Sentiment Analysis",

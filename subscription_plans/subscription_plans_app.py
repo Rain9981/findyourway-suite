@@ -79,6 +79,7 @@ def run():
         - Lead Generation
         - Network Builder
         - Marketing Hub
+        - Campaign Engine
         - AI CMO Engine
         - Strategic Simulator
         - Operations Audit
@@ -104,12 +105,14 @@ def run():
         - Consulting Guide
         - Brand Positioning
         - Business Development
+        - Offer Innovation Engine
         - Strategy Designer
         - Lead Generation
         - Network Builder
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
+        - Campaign Engine
         - AI CMO Engine
         - Strategic Simulator
         - Sentiment Analysis
@@ -139,6 +142,7 @@ def run():
         - Client Intake
         - Brand Positioning
         - Business Development
+        - Offer Innovation Engine
         - Strategy Designer
         - Business Model Canvas
         - Business Genius Engine
@@ -147,6 +151,7 @@ def run():
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
+        - Campaign Engine
         - AI CMO Engine
         - Strategic Simulator
         - Sentiment Analysis
@@ -188,6 +193,8 @@ def run():
         ["Marketing Hub", "🔒", "✅", "✅", "✅"],
         ["Marketing Planner", "🔒", "🔒", "✅", "✅"],
         ["Email Marketing", "🔒", "🔒", "✅", "✅"],
+        ["Campaign Engine", "🔒", "✅", "✅", "✅"],
+        ["Offer Innovation Engine", "🔒", "✅", "✅", "✅"],
         ["AI CMO Engine", "🔒", "✅", "✅", "✅"],
         ["Strategic Simulator", "🔒", "✅", "✅", "✅"],
         ["Sentiment Analysis", "🔒", "🔒", "✅", "✅"],
