@@ -10,120 +10,6 @@ from reportlab.lib.pagesizes import letter
 AI_MODEL = "gpt-4o"
 
 
-def build_campaign_prompt(
-    business_name,
-    offer,
-    audience,
-    campaign_goal,
-    platforms,
-    tone,
-    emotional_trigger,
-    campaign_length,
-    cta,
-    budget_level,
-    visual_style,
-    lead_magnet_goal,
-    optional_notes,
-):
-    return f"""
-Act as Rain Intelligence in elite CMO campaign production mode.
-
-You are a senior marketing strategist, direct-response copywriter, brand psychologist, paid ads strategist, and content planner.
-
-Create a complete campaign asset package that is practical, copy-paste ready, and emotionally persuasive.
-
-Return the response in this exact structure:
-
-1. Campaign Snapshot
-2. Audience Psychology
-3. Core Campaign Message
-4. 21-Day Content Calendar
-   For each day include:
-   - Day
-   - Platform Best Fit
-   - Post Type
-   - Hook
-   - Caption / Post Copy
-   - CTA
-   - Visual or Design Idea
-5. Lead Magnet Ideas
-   Include 7 ideas with:
-   - Title
-   - Format
-   - Why It Converts
-   - CTA
-6. 10 Paid Ad Variations
-   For each ad include:
-   - Platform Best Fit
-   - Headline
-   - Primary Text
-   - CTA
-   - Visual Direction
-   - Funnel Stage
-7. 5 Short-Form Video Ideas
-   For each video include:
-   - Concept
-   - 3-Second Hook
-   - Script Outline
-   - Visual Style
-   - CTA
-8. Campaign Posting Strategy
-9. Messaging Risks to Avoid
-10. Repurposing Ideas
-11. FYW Tool Match
-12. Final CMO Campaign Insight
-
-Business Name:
-{business_name}
-
-Offer / Service:
-{offer}
-
-Target Audience:
-{audience}
-
-Campaign Goal:
-{campaign_goal}
-
-Platforms:
-{platforms}
-
-Tone:
-{tone}
-
-Emotional Trigger:
-{emotional_trigger}
-
-Campaign Length:
-{campaign_length}
-
-Main CTA:
-{cta}
-
-Budget Level:
-{budget_level}
-
-Visual Style:
-{visual_style}
-
-Lead Magnet Goal:
-{lead_magnet_goal}
-
-Optional Notes:
-{optional_notes if optional_notes.strip() else "None provided"}
-
-Relevant FYW tools:
-- Marketing Hub
-- Marketing Planner
-- Email Marketing
-- Lead Generation
-- AI CMO Engine
-- Strategic Simulator
-- Sentiment Analysis
-- KPI Tracker
-"""
-
-
 def create_pdf_buffer(title, output):
     buffer = io.BytesIO()
     pdf = pdf_canvas.Canvas(buffer, pagesize=letter)
@@ -160,40 +46,43 @@ def create_pdf_buffer(title, output):
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
 
-    st.title("📢 Campaign Engine")
-    st.caption("Generate 21 days of content, social copy, visual ideas, paid ads, video ideas, and lead magnets.")
+    st.title("📢 Campaign Engine V3")
+    st.caption("Generate campaign strategy, 21-day content, lead magnets, paid ads, video ideas, and a final CMO-level campaign report.")
 
     st.sidebar.header("💡 Campaign Engine Guide")
     st.sidebar.markdown("""
 **What this tool does:**
-- creates a 21-day campaign content plan
-- writes copy-paste ready captions
-- gives visual/design ideas
-- generates paid ad variations
-- creates short-form video ideas
-- suggests lead magnets
+- builds a campaign strategy
+- creates a full 21-day content calendar
+- generates lead magnet ideas
+- creates 10 ads
+- creates 5 video ideas
+- combines everything into a polished campaign report
 
 **Best use:**
-Use after Marketing Hub and Marketing Planner when you are ready to produce actual campaign assets.
+Use after Marketing Hub and Marketing Planner.
 
-**Pro Tip:** The more specific your audience, offer, and emotional trigger, the stronger the output.
+**Pro Tip:** Generate each section first, then use the final report button to create the premium campaign document.
 """)
 
     defaults = {
-        "ce_business_name": "",
+        "ce_business": "",
         "ce_offer": "",
         "ce_audience": "",
-        "ce_campaign_goal": "",
-        "ce_platforms": "Facebook, Instagram, TikTok, Google",
+        "ce_goal": "",
+        "ce_platforms": "Facebook, Instagram, TikTok, LinkedIn, Google",
         "ce_tone": "Professional / Persuasive",
-        "ce_emotional_trigger": "Clarity and confidence",
-        "ce_campaign_length": "21 days",
+        "ce_emotion": "Clarity and confidence",
         "ce_cta": "",
-        "ce_budget_level": "Low budget",
-        "ce_visual_style": "Modern, premium, clean",
-        "ce_lead_magnet_goal": "",
-        "ce_optional_notes": "",
-        "campaign_engine_result": "",
+        "ce_budget": "Low budget",
+        "ce_visual": "Modern, clean, premium",
+        "ce_notes": "",
+        "strategy_output": "",
+        "content_output": "",
+        "lead_output": "",
+        "ads_output": "",
+        "video_output": "",
+        "full_report_output": "",
     }
 
     for key, value in defaults.items():
@@ -201,32 +90,30 @@ Use after Marketing Hub and Marketing Planner when you are ready to produce actu
             st.session_state[key] = value
 
     if st.button("✨ Autofill Example"):
-        st.session_state["ce_business_name"] = "Find Your Way Network Marketing Consultants"
+        st.session_state["ce_business"] = "Find Your Way Network Marketing Consultants"
         st.session_state["ce_offer"] = "Elite access to the AI Consulting Suite with tools for strategy, marketing, CRM, growth, and performance tracking."
         st.session_state["ce_audience"] = "Small business owners, entrepreneurs, service providers, and creators who feel scattered and need structure, strategy, and smarter execution."
-        st.session_state["ce_campaign_goal"] = "Increase awareness and drive upgrades into Elite access."
+        st.session_state["ce_goal"] = "Increase awareness and drive upgrades into Elite access."
         st.session_state["ce_platforms"] = "Facebook, Instagram, TikTok, LinkedIn, Google Display"
         st.session_state["ce_tone"] = "Professional / Persuasive"
-        st.session_state["ce_emotional_trigger"] = "Clarity and confidence"
-        st.session_state["ce_campaign_length"] = "21 days"
+        st.session_state["ce_emotion"] = "Clarity and confidence"
         st.session_state["ce_cta"] = "Upgrade to Elite Access or start with Client Intake."
-        st.session_state["ce_budget_level"] = "Low budget"
-        st.session_state["ce_visual_style"] = "Black, burgundy, gold, modern AI consulting command center aesthetic."
-        st.session_state["ce_lead_magnet_goal"] = "Collect qualified leads interested in business growth, AI tools, and consulting support."
-        st.session_state["ce_optional_notes"] = "Campaign should feel premium, intelligent, and clear without overwhelming the audience."
+        st.session_state["ce_budget"] = "Low budget"
+        st.session_state["ce_visual"] = "Black, burgundy, gold, modern AI consulting command center aesthetic."
+        st.session_state["ce_notes"] = "Campaign should feel premium, intelligent, and clear without overwhelming the audience."
 
-    st.markdown("### 📥 Campaign Parameters")
+    st.markdown("### 📥 Campaign Inputs")
 
-    business_name = st.text_input("Business Name", key="ce_business_name")
-
+    business = st.text_input("Business Name", key="ce_business")
     offer = st.text_area("Offer / Service", key="ce_offer", height=100)
     audience = st.text_area("Target Audience", key="ce_audience", height=100)
-    campaign_goal = st.text_area("Campaign Goal", key="ce_campaign_goal", height=90)
+    goal = st.text_area("Campaign Goal", key="ce_goal", height=90)
 
     col1, col2 = st.columns(2)
 
     with col1:
         platforms = st.text_area("Platforms", key="ce_platforms", height=90)
+
         tone = st.selectbox(
             "Tone",
             [
@@ -241,14 +128,14 @@ Use after Marketing Hub and Marketing Planner when you are ready to produce actu
             key="ce_tone"
         )
 
-        campaign_length = st.selectbox(
-            "Campaign Length",
-            ["7 days", "14 days", "21 days", "30 days"],
-            key="ce_campaign_length"
+        budget = st.selectbox(
+            "Budget Level",
+            ["No budget", "Low budget", "Moderate budget", "High budget"],
+            key="ce_budget"
         )
 
     with col2:
-        emotional_trigger = st.selectbox(
+        emotion = st.selectbox(
             "Emotional Trigger",
             [
                 "Clarity and confidence",
@@ -260,106 +147,357 @@ Use after Marketing Hub and Marketing Planner when you are ready to produce actu
                 "Relief from overwhelm",
                 "Belonging and community"
             ],
-            key="ce_emotional_trigger"
+            key="ce_emotion"
         )
 
-        budget_level = st.selectbox(
-            "Budget Level",
-            ["No budget", "Low budget", "Moderate budget", "High budget"],
-            key="ce_budget_level"
-        )
+        visual = st.text_area("Visual Style", key="ce_visual", height=90)
+        cta = st.text_area("Main CTA", key="ce_cta", height=90)
 
-        visual_style = st.text_area("Visual Style", key="ce_visual_style", height=90)
+    notes = st.text_area("Optional Notes", key="ce_notes", height=100)
 
-    cta = st.text_area("Main CTA", key="ce_cta", height=80)
-    lead_magnet_goal = st.text_area("Lead Magnet Goal", key="ce_lead_magnet_goal", height=80)
-    optional_notes = st.text_area("Optional Notes", key="ce_optional_notes", height=100)
+    required = business.strip() and offer.strip() and audience.strip() and goal.strip() and cta.strip()
 
-    if st.button("🚀 Generate Campaign Assets"):
-        required = [
-            business_name.strip(),
-            offer.strip(),
-            audience.strip(),
-            campaign_goal.strip(),
-            cta.strip(),
-        ]
+    st.divider()
+    st.markdown("## 🧠 Generate Campaign Sections")
 
-        if not all(required):
-            st.warning("⚠️ Please complete the main campaign fields before generating.")
+    if st.button("🧠 Generate Campaign Strategy"):
+        if not required:
+            st.warning("Please complete Business, Offer, Audience, Goal, and CTA first.")
         else:
-            try:
-                with st.spinner("Generating campaign assets..."):
-                    prompt = build_campaign_prompt(
-                        business_name=business_name,
-                        offer=offer,
-                        audience=audience,
-                        campaign_goal=campaign_goal,
-                        platforms=platforms,
-                        tone=tone,
-                        emotional_trigger=emotional_trigger,
-                        campaign_length=campaign_length,
-                        cta=cta,
-                        budget_level=budget_level,
-                        visual_style=visual_style,
-                        lead_magnet_goal=lead_magnet_goal,
-                        optional_notes=optional_notes,
-                    )
+            with st.spinner("Generating campaign strategy..."):
+                prompt = f"""
+Act as Rain Intelligence in elite CMO strategy mode.
 
-                    response = client.chat.completions.create(
-                        model=AI_MODEL,
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": (
-                                    "You are Rain Intelligence in elite CMO campaign production mode: "
-                                    "strategic, persuasive, conversion-focused, creative, and practical."
-                                )
-                            },
-                            {"role": "user", "content": prompt}
-                        ],
-                        temperature=0.85,
-                    )
+Create a campaign strategy for:
 
-                    output = response.choices[0].message.content
-                    st.session_state["campaign_engine_result"] = output
+Business: {business}
+Offer: {offer}
+Audience: {audience}
+Goal: {goal}
+Platforms: {platforms}
+Tone: {tone}
+Emotional Trigger: {emotion}
+CTA: {cta}
+Budget: {budget}
+Visual Style: {visual}
+Notes: {notes}
 
-                    try:
-                        save_data("Campaign_Engine", {
-                            "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                            "User_Role": st.session_state.get("user_role", "guest"),
-                            "Business_Name": business_name,
-                            "Offer": offer,
-                            "Audience": audience,
-                            "Campaign_Goal": campaign_goal,
-                            "Platforms": platforms,
-                            "Tone": tone,
-                            "Emotional_Trigger": emotional_trigger,
-                            "Campaign_Length": campaign_length,
-                            "CTA": cta,
-                            "Budget_Level": budget_level,
-                            "Visual_Style": visual_style,
-                            "Lead_Magnet_Goal": lead_magnet_goal,
-                            "Optional_Notes": optional_notes,
-                            "Campaign_Result": output,
-                        })
-                    except Exception as save_error:
-                        st.warning(f"Generated, but Google Sheets save had an issue: {save_error}")
+Return:
+1. Campaign Snapshot
+2. Audience Psychology
+3. Core Message
+4. Funnel Strategy
+5. Main Campaign Angle
+6. Posting Strategy
+7. Messaging Risks to Avoid
+8. Final CMO Insight
+"""
+                response = client.chat.completions.create(
+                    model=AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are Rain Intelligence, an elite CMO and campaign strategist."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.75,
+                )
+                st.session_state["strategy_output"] = response.choices[0].message.content
 
-                st.success("✅ Campaign assets generated.")
-                st.subheader("📢 Campaign Asset Package")
-                st.markdown(output)
+    if st.session_state["strategy_output"]:
+        st.subheader("🧠 Campaign Strategy")
+        st.markdown(st.session_state["strategy_output"])
 
-            except Exception as e:
-                st.error(f"❌ GPT Error: {e}")
+    if st.button("📅 Generate Full 21-Day Content Calendar"):
+        if not required:
+            st.warning("Please complete Business, Offer, Audience, Goal, and CTA first.")
+        else:
+            with st.spinner("Generating full 21-day content calendar..."):
+                prompt = f"""
+Create a FULL 21-day content calendar.
 
-    if st.session_state.get("campaign_engine_result"):
-        st.divider()
-        pdf_buffer = create_pdf_buffer("Campaign Engine Report", st.session_state["campaign_engine_result"])
+Business: {business}
+Offer: {offer}
+Audience: {audience}
+Goal: {goal}
+Platforms: {platforms}
+Tone: {tone}
+Emotional Trigger: {emotion}
+CTA: {cta}
+Visual Style: {visual}
+
+Rules:
+- Do NOT skip days.
+- Include exactly Day 1 through Day 21.
+- Keep each day short enough to complete all days.
+- Make captions copy-paste ready.
+
+For each day include:
+Day:
+Platform Best Fit:
+Post Type:
+Hook:
+Caption / Post Copy:
+CTA:
+Visual or Design Idea:
+"""
+                response = client.chat.completions.create(
+                    model=AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are a social media campaign strategist. Complete all 21 days without skipping."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.8,
+                )
+                st.session_state["content_output"] = response.choices[0].message.content
+
+    if st.session_state["content_output"]:
+        st.subheader("📅 21-Day Content Calendar")
+        st.markdown(st.session_state["content_output"])
+
+    if st.button("🎯 Generate Lead Magnet Ideas"):
+        if not required:
+            st.warning("Please complete Business, Offer, Audience, Goal, and CTA first.")
+        else:
+            with st.spinner("Generating lead magnet ideas..."):
+                prompt = f"""
+Create 7 lead magnet ideas for:
+
+Business: {business}
+Offer: {offer}
+Audience: {audience}
+Goal: {goal}
+CTA: {cta}
+
+For each include:
+1. Title
+2. Format
+3. What problem it solves
+4. Why it converts
+5. CTA
+6. Visual idea
+"""
+                response = client.chat.completions.create(
+                    model=AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are a lead generation strategist and offer architect."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.8,
+                )
+                st.session_state["lead_output"] = response.choices[0].message.content
+
+    if st.session_state["lead_output"]:
+        st.subheader("🎯 Lead Magnet Ideas")
+        st.markdown(st.session_state["lead_output"])
+
+    if st.button("📢 Generate 10 Paid Ads"):
+        if not required:
+            st.warning("Please complete Business, Offer, Audience, Goal, and CTA first.")
+        else:
+            with st.spinner("Generating 10 paid ads..."):
+                prompt = f"""
+Create exactly 10 paid ad variations.
+
+Business: {business}
+Offer: {offer}
+Audience: {audience}
+Goal: {goal}
+Platforms: {platforms}
+Tone: {tone}
+Emotional Trigger: {emotion}
+CTA: {cta}
+Visual Style: {visual}
+
+Rules:
+- Include exactly Ad 1 through Ad 10.
+- Do not skip any ad.
+- Make each ad platform-ready.
+
+For each ad include:
+Ad Number:
+Platform Best Fit:
+Headline:
+Primary Text:
+CTA:
+Visual Direction:
+Funnel Stage:
+"""
+                response = client.chat.completions.create(
+                    model=AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are a paid ads strategist and direct-response copywriter. Complete all 10 ads."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.85,
+                )
+                st.session_state["ads_output"] = response.choices[0].message.content
+
+    if st.session_state["ads_output"]:
+        st.subheader("📢 10 Paid Ad Variations")
+        st.markdown(st.session_state["ads_output"])
+
+    if st.button("🎥 Generate 5 Video Ideas"):
+        if not required:
+            st.warning("Please complete Business, Offer, Audience, Goal, and CTA first.")
+        else:
+            with st.spinner("Generating video ideas..."):
+                prompt = f"""
+Create 5 short-form video ideas.
+
+Business: {business}
+Offer: {offer}
+Audience: {audience}
+Goal: {goal}
+Tone: {tone}
+Emotional Trigger: {emotion}
+CTA: {cta}
+Visual Style: {visual}
+
+For each video include:
+Video Number:
+Concept:
+3-Second Hook:
+Script Outline:
+Visual Style:
+CTA:
+Repurpose Idea:
+"""
+                response = client.chat.completions.create(
+                    model=AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are a short-form video strategist and campaign creative director."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.85,
+                )
+                st.session_state["video_output"] = response.choices[0].message.content
+
+    if st.session_state["video_output"]:
+        st.subheader("🎥 5 Short-Form Video Ideas")
+        st.markdown(st.session_state["video_output"])
+
+    st.divider()
+    st.markdown("## 📄 Final Campaign Report")
+
+    if st.button("📄 Generate Full CMO Campaign Report"):
+        missing = []
+        if not st.session_state["strategy_output"]:
+            missing.append("Campaign Strategy")
+        if not st.session_state["content_output"]:
+            missing.append("21-Day Content Calendar")
+        if not st.session_state["lead_output"]:
+            missing.append("Lead Magnets")
+        if not st.session_state["ads_output"]:
+            missing.append("Paid Ads")
+        if not st.session_state["video_output"]:
+            missing.append("Video Ideas")
+
+        if missing:
+            st.warning(f"Generate these sections first: {', '.join(missing)}")
+        else:
+            with st.spinner("Assembling premium campaign report..."):
+                combined = f"""
+Campaign Inputs:
+Business: {business}
+Offer: {offer}
+Audience: {audience}
+Goal: {goal}
+Platforms: {platforms}
+Tone: {tone}
+Emotional Trigger: {emotion}
+CTA: {cta}
+Budget: {budget}
+Visual Style: {visual}
+Notes: {notes}
+
+Campaign Strategy:
+{st.session_state["strategy_output"]}
+
+21-Day Content Calendar:
+{st.session_state["content_output"]}
+
+Lead Magnet Ideas:
+{st.session_state["lead_output"]}
+
+Paid Ads:
+{st.session_state["ads_output"]}
+
+Video Ideas:
+{st.session_state["video_output"]}
+"""
+
+                prompt = f"""
+Act as Rain Intelligence in executive CMO reporting mode.
+
+Turn the following campaign assets into one polished, premium, client-ready campaign report.
+
+Keep all generated assets intact. Do not remove the 21 days, 10 ads, or 5 videos.
+
+Format the final report as:
+
+1. Executive Campaign Overview
+2. Strategic Campaign Logic
+3. Audience Psychology
+4. Campaign Message System
+5. 21-Day Content Calendar
+6. Lead Magnet System
+7. Paid Ad System
+8. Video Content System
+9. Visual Direction Guide
+10. Posting and Launch Recommendations
+11. KPI Suggestions
+12. Final CMO Recommendation
+
+Campaign Assets:
+{combined}
+"""
+
+                response = client.chat.completions.create(
+                    model=AI_MODEL,
+                    messages=[
+                        {"role": "system", "content": "You are Rain Intelligence, an executive CMO creating a premium campaign report."},
+                        {"role": "user", "content": prompt}
+                    ],
+                    temperature=0.65,
+                )
+                st.session_state["full_report_output"] = response.choices[0].message.content
+
+                try:
+                    save_data("Campaign_Engine", {
+                        "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                        "User_Role": st.session_state.get("user_role", "guest"),
+                        "Business": business,
+                        "Offer": offer,
+                        "Audience": audience,
+                        "Goal": goal,
+                        "Platforms": platforms,
+                        "Tone": tone,
+                        "Emotional_Trigger": emotion,
+                        "CTA": cta,
+                        "Budget": budget,
+                        "Visual_Style": visual,
+                        "Notes": notes,
+                        "Campaign_Strategy": st.session_state["strategy_output"],
+                        "Content_21_Days": st.session_state["content_output"],
+                        "Lead_Magnets": st.session_state["lead_output"],
+                        "Paid_Ads": st.session_state["ads_output"],
+                        "Video_Ideas": st.session_state["video_output"],
+                        "Full_Report": st.session_state["full_report_output"],
+                    })
+                except Exception as save_error:
+                    st.warning(f"Report generated, but Google Sheets save had an issue: {save_error}")
+
+                st.success("✅ Full CMO campaign report generated.")
+
+    if st.session_state["full_report_output"]:
+        st.subheader("📄 Full CMO Campaign Report")
+        st.markdown(st.session_state["full_report_output"])
+
+        pdf_buffer = create_pdf_buffer("Campaign Engine V3 Report", st.session_state["full_report_output"])
 
         st.download_button(
-            "📄 Download Campaign Report",
+            "📄 Download Full Campaign Report",
             pdf_buffer,
-            file_name="Campaign_Engine_Report.pdf"
+            file_name="Campaign_Engine_V3_Report.pdf"
         )
 
 
