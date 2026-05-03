@@ -208,6 +208,22 @@ def run():
             "recommendation": "Best matched with FYW Lead Generation and growth-focused marketing services."
         },
         {
+            "name": "🌐 Network Deployment Engine",
+            "purpose": "Activates the user’s existing network around a specific goal, mission, launch, or growth objective.",
+            "benefit": "Creates a clear contact order, Power Circle breakdown, outreach messages, and 7-day deployment plan.",
+            "best_time": "Use when the user already has connections but needs to turn them into action.",
+            "pairs_with": "Network Builder, Campaign Engine, Business Development",
+            "recommendation": "Best matched with FYW partnership strategy, referral activation, launch support, and relationship-based growth planning."
+        },
+        {
+            "name": "📘 Business Plan Generator",
+            "purpose": "Generates a complete professional business plan from the user’s idea, audience, offer, revenue model, stage, and goal.",
+            "benefit": "Produces a finished document for launch planning, investor conversations, growth direction, or internal clarity.",
+            "best_time": "Use after the business concept, offer, and audience are clear.",
+            "pairs_with": "Business Model Canvas, Business Genius Engine, Strategy Designer",
+            "recommendation": "Best matched with FYW business planning, investor preparation, launch strategy, and premium consulting review."
+        },
+        {
             "name": "🌐 Network Builder",
             "purpose": "Helps you think through who you need to connect with, why those relationships matter, and how to approach them strategically.",
             "benefit": "Strengthens your ability to build useful partnerships, referral paths, and growth-supporting relationships.",

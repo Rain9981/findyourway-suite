@@ -105,10 +105,12 @@ def run():
         - Consulting Guide
         - Brand Positioning
         - Business Development
+        - Business Plan Generator
         - Offer Innovation Engine
         - Strategy Designer
         - Lead Generation
         - Network Builder
+        - Network Deployment Engine
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
@@ -142,12 +144,14 @@ def run():
         - Client Intake
         - Brand Positioning
         - Business Development
+        - Business Plan Generator
         - Offer Innovation Engine
         - Strategy Designer
         - Business Model Canvas
         - Business Genius Engine
         - Lead Generation
         - Network Builder
+        - Network Deployment Engine
         - Marketing Hub
         - Marketing Planner
         - Email Marketing
@@ -185,16 +189,18 @@ def run():
         ["Client Intake", "🔒", "🔒", "🔒", "✅"],
         ["Brand Positioning", "✅", "✅", "✅", "✅"],
         ["Business Development", "🔒", "✅", "✅", "✅"],
+        ["Business Plan Generator", "❌", "❌", "✅", "✅"],
         ["Strategy Designer", "✅", "✅", "✅", "✅"],
         ["Business Model Canvas", "🔒", "🔒", "🔒", "✅"],
         ["Business Genius Engine", "🔒", "🔒", "🔒", "✅"],
         ["Lead Generation", "🔒", "✅", "✅", "✅"],
         ["Network Builder", "✅", "✅", "✅", "✅"],
+        ["Network Deployment Engine", "❌", "❌", "✅", "✅"],
         ["Marketing Hub", "🔒", "✅", "✅", "✅"],
         ["Marketing Planner", "🔒", "🔒", "✅", "✅"],
         ["Email Marketing", "🔒", "🔒", "✅", "✅"],
         ["Campaign Engine", "🔒", "✅", "✅", "✅"],
-        ["Offer Innovation Engine", "🔒", "✅", "✅", "✅"],
+        ["Offer Innovation Engine", "🔒", "🔒", "✅", "✅"],
         ["AI CMO Engine", "🔒", "✅", "✅", "✅"],
         ["Strategic Simulator", "🔒", "✅", "✅", "✅"],
         ["Sentiment Analysis", "🔒", "🔒", "✅", "✅"],
