@@ -1,12 +1,29 @@
-import streamlit as st
 import datetime
 import io
+import os
+import re
+from xml.sax.saxutils import escape
+
+import streamlit as st
 from openai import OpenAI
-from reportlab.pdfgen import canvas as pdf_canvas
+
+from reportlab.lib import colors
+from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.lib.pagesizes import letter
+from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
+from reportlab.lib.units import inch
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.platypus import (
+    KeepTogether,
+    PageBreak,
+    Paragraph,
+    SimpleDocTemplate,
+    Spacer,
+)
+
 from backend.email_utils import send_email
 from backend.google_sheets import save_data
-from backend.ai_config import FIND_WHERE_YOU_WIN_MODEL
 
 
 def build_find_where_you_win_prompt(
@@ -353,6 +370,530 @@ Answer:
 End with a powerful but professional advisory tone.
 """
 
+def _register_pdf_fonts():
+    """
+    Register a Unicode-compatible font when one is available.
+
+    DejaVu Sans supports trademark symbols, bullets, arrows, and most
+    characters commonly used in Rain Intelligence reports.
+
+    Helvetica is used as a safe fallback.
+    """
+
+    regular_candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans.ttf",
+        "C:/Windows/Fonts/DejaVuSans.ttf",
+    ]
+
+    bold_candidates = [
+        "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+        "/usr/share/fonts/dejavu/DejaVuSans-Bold.ttf",
+        "C:/Windows/Fonts/DejaVuSans-Bold.ttf",
+    ]
+
+    regular_path = next(
+        (path for path in regular_candidates if os.path.exists(path)),
+        None,
+    )
+
+    bold_path = next(
+        (path for path in bold_candidates if os.path.exists(path)),
+        None,
+    )
+
+    if regular_path and bold_path:
+        try:
+            pdfmetrics.registerFont(TTFont("RainRegular", regular_path))
+            pdfmetrics.registerFont(TTFont("RainBold", bold_path))
+            return "RainRegular", "RainBold"
+        except Exception:
+            pass
+
+    return "Helvetica", "Helvetica-Bold"
+
+
+def _format_inline_markdown(text):
+    """
+    Convert basic Markdown emphasis into ReportLab Paragraph markup
+    while safely escaping special XML characters.
+    """
+
+    safe_text = escape(text.strip())
+
+    # Convert **bold text** into ReportLab bold markup.
+    safe_text = re.sub(
+        r"\*\*(.+?)\*\*",
+        r"<b>\1</b>",
+        safe_text,
+    )
+
+    # Convert *italic text* into ReportLab italic markup.
+    safe_text = re.sub(
+        r"(?<!\*)\*([^*]+?)\*(?!\*)",
+        r"<i>\1</i>",
+        safe_text,
+    )
+
+    # Convert Markdown links into clickable PDF links.
+    safe_text = re.sub(
+        r"\[([^\]]+)\]\((https?://[^)]+)\)",
+        r'<link href="\2" color="#1B4D6B">\1</link>',
+        safe_text,
+    )
+
+    return safe_text
+
+
+def _add_page_header_footer(canvas, document):
+    """
+    Add a clean header, footer, divider line, and page number
+    to every report page after the cover.
+    """
+
+    canvas.saveState()
+
+    page_width, page_height = letter
+    page_number = canvas.getPageNumber()
+
+    regular_font = getattr(document, "rain_regular_font", "Helvetica")
+    bold_font = getattr(document, "rain_bold_font", "Helvetica-Bold")
+
+    # Do not place the standard header/footer on the cover page.
+    if page_number > 1:
+        canvas.setStrokeColor(colors.HexColor("#C4A24D"))
+        canvas.setLineWidth(0.7)
+        canvas.line(
+            0.72 * inch,
+            page_height - 0.62 * inch,
+            page_width - 0.72 * inch,
+            page_height - 0.62 * inch,
+        )
+
+        canvas.setFillColor(colors.HexColor("#17324D"))
+        canvas.setFont(bold_font, 8.5)
+        canvas.drawString(
+            0.72 * inch,
+            page_height - 0.47 * inch,
+            "FIND WHERE YOU WIN™",
+        )
+
+        canvas.setFont(regular_font, 8)
+        canvas.drawRightString(
+            page_width - 0.72 * inch,
+            page_height - 0.47 * inch,
+            "RAIN INTELLIGENCE™",
+        )
+
+        canvas.setStrokeColor(colors.HexColor("#D9D9D9"))
+        canvas.setLineWidth(0.5)
+        canvas.line(
+            0.72 * inch,
+            0.58 * inch,
+            page_width - 0.72 * inch,
+            0.58 * inch,
+        )
+
+        canvas.setFillColor(colors.HexColor("#555555"))
+        canvas.setFont(regular_font, 7.5)
+        canvas.drawString(
+            0.72 * inch,
+            0.38 * inch,
+            "Find Your Way Consulting Suite • Confidential",
+        )
+
+        canvas.drawRightString(
+            page_width - 0.72 * inch,
+            0.38 * inch,
+            f"Page {page_number}",
+        )
+
+    canvas.restoreState()
+
+
+def build_professional_pdf(report_text, prepared_for=""):
+    """
+    Convert the complete Rain Intelligence report into a professional PDF.
+
+    The engine uses ReportLab Platypus so text wraps naturally,
+    page breaks occur automatically, and no content is cut off.
+    """
+
+    pdf_buffer = io.BytesIO()
+
+    regular_font, bold_font = _register_pdf_fonts()
+
+    document = SimpleDocTemplate(
+        pdf_buffer,
+        pagesize=letter,
+        rightMargin=0.72 * inch,
+        leftMargin=0.72 * inch,
+        topMargin=0.82 * inch,
+        bottomMargin=0.78 * inch,
+        title="Find Where You Win Market Intelligence Report",
+        author="Rain Intelligence and Find Your Way",
+        subject="Market Intelligence Report",
+        pageCompression=1,
+    )
+
+    document.rain_regular_font = regular_font
+    document.rain_bold_font = bold_font
+
+    styles = getSampleStyleSheet()
+
+    cover_brand_style = ParagraphStyle(
+        name="RainCoverBrand",
+        parent=styles["Normal"],
+        fontName=bold_font,
+        fontSize=13,
+        leading=17,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#C4A24D"),
+        spaceAfter=18,
+    )
+
+    cover_title_style = ParagraphStyle(
+        name="RainCoverTitle",
+        parent=styles["Title"],
+        fontName=bold_font,
+        fontSize=24,
+        leading=30,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#17324D"),
+        spaceAfter=14,
+    )
+
+    cover_subtitle_style = ParagraphStyle(
+        name="RainCoverSubtitle",
+        parent=styles["Normal"],
+        fontName=regular_font,
+        fontSize=13,
+        leading=18,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#444444"),
+        spaceAfter=28,
+    )
+
+    cover_details_style = ParagraphStyle(
+        name="RainCoverDetails",
+        parent=styles["Normal"],
+        fontName=regular_font,
+        fontSize=10.5,
+        leading=17,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor("#555555"),
+    )
+
+    title_style = ParagraphStyle(
+        name="RainReportTitle",
+        parent=styles["Title"],
+        fontName=bold_font,
+        fontSize=20,
+        leading=25,
+        alignment=TA_LEFT,
+        textColor=colors.HexColor("#17324D"),
+        spaceBefore=4,
+        spaceAfter=16,
+        keepWithNext=True,
+    )
+
+    heading_style = ParagraphStyle(
+        name="RainHeading",
+        parent=styles["Heading1"],
+        fontName=bold_font,
+        fontSize=15,
+        leading=19,
+        textColor=colors.HexColor("#17324D"),
+        spaceBefore=15,
+        spaceAfter=7,
+        keepWithNext=True,
+    )
+
+    subheading_style = ParagraphStyle(
+        name="RainSubheading",
+        parent=styles["Heading2"],
+        fontName=bold_font,
+        fontSize=12,
+        leading=16,
+        textColor=colors.HexColor("#35566F"),
+        spaceBefore=10,
+        spaceAfter=5,
+        keepWithNext=True,
+    )
+
+    minor_heading_style = ParagraphStyle(
+        name="RainMinorHeading",
+        parent=styles["Heading3"],
+        fontName=bold_font,
+        fontSize=10.5,
+        leading=14,
+        textColor=colors.HexColor("#444444"),
+        spaceBefore=8,
+        spaceAfter=4,
+        keepWithNext=True,
+    )
+
+    body_style = ParagraphStyle(
+        name="RainBody",
+        parent=styles["BodyText"],
+        fontName=regular_font,
+        fontSize=9.4,
+        leading=13.6,
+        textColor=colors.HexColor("#222222"),
+        alignment=TA_LEFT,
+        spaceAfter=7,
+        splitLongWords=True,
+        allowWidows=0,
+        allowOrphans=0,
+    )
+
+    bullet_style = ParagraphStyle(
+        name="RainBullet",
+        parent=body_style,
+        leftIndent=17,
+        firstLineIndent=-9,
+        bulletIndent=6,
+        spaceBefore=1,
+        spaceAfter=4,
+    )
+
+    numbered_style = ParagraphStyle(
+        name="RainNumbered",
+        parent=body_style,
+        leftIndent=20,
+        firstLineIndent=-15,
+        spaceBefore=1,
+        spaceAfter=4,
+    )
+
+    quote_style = ParagraphStyle(
+        name="RainQuote",
+        parent=body_style,
+        leftIndent=18,
+        rightIndent=18,
+        borderColor=colors.HexColor("#C4A24D"),
+        borderWidth=1,
+        borderPadding=8,
+        backColor=colors.HexColor("#F8F6EF"),
+        textColor=colors.HexColor("#333333"),
+        spaceBefore=5,
+        spaceAfter=9,
+    )
+
+    story = []
+
+    # -------------------------
+    # Cover page
+    # -------------------------
+    story.append(Spacer(1, 1.18 * inch))
+
+    story.append(
+        Paragraph(
+            "RAIN INTELLIGENCE™",
+            cover_brand_style,
+        )
+    )
+
+    story.append(
+        Paragraph(
+            "FIND WHERE YOU WIN™",
+            cover_title_style,
+        )
+    )
+
+    story.append(
+        Paragraph(
+            "Market Intelligence Report",
+            cover_subtitle_style,
+        )
+    )
+
+    story.append(Spacer(1, 0.28 * inch))
+
+    cover_details = []
+
+    if prepared_for and prepared_for.strip():
+        cover_details.append(
+            f"<b>Prepared for</b><br/>{escape(prepared_for.strip())}"
+        )
+
+    cover_details.append(
+        "<b>Generated</b><br/>"
+        + datetime.date.today().strftime("%B %d, %Y")
+    )
+
+    story.append(
+        Paragraph(
+            "<br/><br/>".join(cover_details),
+            cover_details_style,
+        )
+    )
+
+    story.append(Spacer(1, 1.25 * inch))
+
+    story.append(
+        Paragraph(
+            "Strategic analysis prepared through the "
+            "Find Your Way Consulting Suite.",
+            cover_details_style,
+        )
+    )
+
+    story.append(PageBreak())
+
+    # -------------------------
+    # Report body
+    # -------------------------
+    lines = report_text.replace("\r\n", "\n").replace("\r", "\n").split("\n")
+
+    paragraph_lines = []
+
+    def flush_paragraph():
+        if not paragraph_lines:
+            return
+
+        paragraph_text = " ".join(
+            line.strip() for line in paragraph_lines if line.strip()
+        )
+
+        paragraph_lines.clear()
+
+        if paragraph_text:
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(paragraph_text),
+                    body_style,
+                )
+            )
+
+    for raw_line in lines:
+        line = raw_line.strip()
+
+        if not line:
+            flush_paragraph()
+            continue
+
+        # Main Markdown report title.
+        if line.startswith("# "):
+            flush_paragraph()
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(line[2:]),
+                    title_style,
+                )
+            )
+            continue
+
+        # Major section heading.
+        if line.startswith("## "):
+            flush_paragraph()
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(line[3:]),
+                    heading_style,
+                )
+            )
+            continue
+
+        # Subheading.
+        if line.startswith("### "):
+            flush_paragraph()
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(line[4:]),
+                    subheading_style,
+                )
+            )
+            continue
+
+        # Smaller heading.
+        if line.startswith("#### "):
+            flush_paragraph()
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(line[5:]),
+                    minor_heading_style,
+                )
+            )
+            continue
+
+        # Standard bullet types.
+        if re.match(r"^[-*•●▪]\s+", line):
+            flush_paragraph()
+            bullet_text = re.sub(r"^[-*•●▪]\s+", "", line)
+
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(bullet_text),
+                    bullet_style,
+                    bulletText="•",
+                )
+            )
+            continue
+
+        # Numbered list items.
+        numbered_match = re.match(r"^(\d+)[.)]\s+(.*)", line)
+
+        if numbered_match:
+            flush_paragraph()
+
+            number = numbered_match.group(1)
+            item_text = numbered_match.group(2)
+
+            story.append(
+                Paragraph(
+                    f"<b>{number}.</b> "
+                    f"{_format_inline_markdown(item_text)}",
+                    numbered_style,
+                )
+            )
+            continue
+
+        # Quoted or highlighted advisory line.
+        if line.startswith("> "):
+            flush_paragraph()
+
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(line[2:]),
+                    quote_style,
+                )
+            )
+            continue
+
+        # Detect short standalone labels such as:
+        # "Verified current findings"
+        # "What to avoid"
+        # "Best immediate fit"
+        #
+        # This creates hierarchy without changing the AI-generated wording.
+        if (
+            len(line) <= 75
+            and not line.endswith((".", ",", ";", ":"))
+            and len(line.split()) <= 10
+        ):
+            flush_paragraph()
+
+            story.append(
+                Paragraph(
+                    _format_inline_markdown(line),
+                    minor_heading_style,
+                )
+            )
+            continue
+
+        paragraph_lines.append(line)
+
+    flush_paragraph()
+
+    document.build(
+        story,
+        onFirstPage=_add_page_header_footer,
+        onLaterPages=_add_page_header_footer,
+    )
+
+    pdf_buffer.seek(0)
+    return pdf_buffer
 
 def run():
     client = OpenAI(api_key=st.secrets["openai"]["api_key"])
@@ -916,38 +1457,25 @@ def run():
 - Use the **Consulting Guide** tab if you want help understanding the recommended tools next
 """)
 
-        pdf_buffer = io.BytesIO()
-        pdf = pdf_canvas.Canvas(pdf_buffer, pagesize=letter)
-        width, height = letter
-
-        pdf.setFont("Helvetica-Bold", 14)
-        pdf.drawString(50, height - 40, "Find Where You Win Market Intelligence Report")
-        pdf.setFont("Helvetica", 10)
-        pdf.drawString(50, height - 60, f"Generated on {datetime.date.today().strftime('%B %d, %Y')}")
-
-        text = pdf.beginText(50, height - 90)
-        text.setFont("Helvetica", 10)
-
-        y_position = height - 90
-        for line in output.split("\n"):
-            if y_position < 50:
-                pdf.drawText(text)
-                pdf.showPage()
-                text = pdf.beginText(50, height - 50)
-                text.setFont("Helvetica", 10)
-                y_position = height - 50
-            text.textLine(line[:110])
-            y_position -= 12
-
-        pdf.drawText(text)
-        pdf.save()
-        pdf_buffer.seek(0)
-
-        st.download_button(
-            "📄 Download Market Intelligence Report as PDF",
-            data=pdf_buffer,
-            file_name="Find_Where_You_Win_Market_Intelligence_Report.pdf"
-        )
+        try:
+            pdf_buffer = build_professional_pdf(
+                report_text=output,
+                prepared_for=st.session_state.get("user_name", ""),
+            )
+        
+            st.download_button(
+                label="📄 Download Professional PDF Report",
+                data=pdf_buffer.getvalue(),
+                file_name="Find_Where_You_Win_Market_Intelligence_Report.pdf",
+                mime="application/pdf",
+                use_container_width=True,
+            )
+        
+        except Exception as pdf_error:
+            st.error(
+                "The report was generated successfully, but the professional "
+                f"PDF could not be prepared: {pdf_error}"
+            )
 
         if email_enabled and user_email:
             if st.button("📧 Send Market Intelligence Report to My Email"):
