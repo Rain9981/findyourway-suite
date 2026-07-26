@@ -6,6 +6,7 @@ from reportlab.pdfgen import canvas as pdf_canvas
 from reportlab.lib.pagesizes import letter
 from backend.email_utils import send_email
 from backend.google_sheets import save_data
+from backend.ai_config import FIND_WHERE_YOU_WIN_MODEL
 
 
 def build_find_where_you_win_prompt(
@@ -27,6 +28,10 @@ def build_find_where_you_win_prompt(
     complaints,
     underserved,
     opportunity_preferences,
+    learning_readiness,
+    learning_format,
+    credential_willingness,
+    education_constraints,
     weekly_time,
     startup_budget,
     risk_level,
@@ -54,6 +59,12 @@ Important:
 - If live data is not provided, use informed market reasoning, demographic assumptions, urban/suburban business patterns, consumer behavior patterns, and strategic inference.
 - Do not sound generic.
 - Do not repeat the user's answers back.
+- The user may already have a clear opportunity in mind, or they may only know their gifts, strengths, experience, resources, and desired lifestyle.
+- When the user does not have a clear direction, translate their gifts and strengths into practical opportunity pathways instead of forcing a conventional business idea.
+- Determine whether each recommended pathway requires no additional training, self-directed learning, short-term certification, professional licensing, apprenticeship, college-level education, or supervised experience.
+- Never recommend formal school, certification, or licensing unless it materially improves eligibility, safety, credibility, legal compliance, income potential, or access to the opportunity.
+- Clearly distinguish legal requirements from optional credibility-building education.
+- Account for the user's available time, budget, lifestyle, family obligations, and preferred learning format.
 - Interpret the data and produce a premium consulting-style report.
 - Be decisive, practical, and commercially intelligent.
 
@@ -106,6 +117,19 @@ Underserved Groups:
 Opportunity Preferences:
 {opportunity_preferences}
 
+Learning, Licensing, and Readiness:
+Willingness to Learn:
+{learning_readiness}
+
+Preferred Learning Format:
+{learning_format}
+
+Certification / Licensing Willingness:
+{credential_willingness}
+
+Education or Lifestyle Constraints:
+{education_constraints}
+
 Capacity:
 Weekly Time Available:
 {weekly_time}
@@ -127,6 +151,21 @@ Optional Network Builder Plan:
 
 Optional Notes:
 {notes if notes.strip() else "None provided"}
+
+LIVE RESEARCH RULES:
+
+When live web research is enabled:
+- Research the user's city, state, nearby service areas, proposed opportunity directions, customer demand, current industry signals, and relevant education, certification, licensing, registration, permit, or insurance considerations.
+- Prefer authoritative sources such as official government agencies, licensing boards, labor departments, census sources, educational institutions, economic development agencies, and respected industry organizations.
+- Separate verified current findings from strategic inference.
+- Cite live findings with source links or source references in the relevant sections.
+- Do not treat a search result as proof of local demand without explaining the signal and its limitations.
+- Never give definitive legal, licensing, tax, or regulatory advice. Direct the user to verify requirements with the appropriate authority.
+- Use live research to improve the recommendation, not to overwhelm the user's gifts, strengths, lifestyle, and goals.
+
+When live research is not enabled:
+- Follow the earlier instruction not to claim access to live data.
+- Clearly label location and market conclusions as informed strategic inference.
 
 Return the response in this exact structure:
 
@@ -248,7 +287,24 @@ Marketing, partnerships, first sales, proof building.
 ### Days 61–90
 Refinement, scale, automation, stronger positioning.
 
-## 11. What It Takes to Win
+## 11. Learning, Licensing, and Capability Path
+
+For the strongest recommended opportunity, determine what the user must learn, prove, practice, or qualify for.
+
+Include:
+- Skills they already possess and can use immediately
+- Skills they should strengthen through self-study
+- Skills best learned through a course, mentor, apprenticeship, or supervised practice
+- Any certification that is useful but optional
+- Any license, permit, registration, degree, insurance, or legal qualification that may be required
+- A realistic learning sequence based on their available time and lifestyle
+- Low-cost or free learning options when appropriate
+- What they should accomplish before attempting to sell, launch, apply, invest, or scale
+- A clear classification for each requirement: Required, Strongly Recommended, Optional, or Not Needed
+
+Do not invent exact legal requirements. When live research is not enabled, clearly state that local licensing and certification requirements must be verified with the relevant state, city, professional board, school, or regulatory authority.
+
+## 12. What It Takes to Win
 Tell the user the truth.
 
 Include:
@@ -258,7 +314,7 @@ Include:
 - what they must stop doing
 - what they must focus on
 
-## 12. FYW Tool and Program Match
+## 13. FYW Tool and Program Match
 Recommend exact Find Your Way tools, tabs, programs, or pathways if they clearly fit.
 
 Use from:
@@ -285,7 +341,7 @@ Use from:
 - Legacy Architecture
 - FYW InterNetwork membership pathway
 
-## 13. Final Rain Intelligence Recommendation
+## 14. Final Rain Intelligence Recommendation
 Give a decisive strategic conclusion.
 
 Answer:
@@ -528,7 +584,63 @@ def run():
         if autofill_value("opportunity_preferences") else ["Local service business"]
     )
 
-    st.markdown("### ⚖️ Section 7: Capacity + Risk")
+    st.markdown("### 🎓 Section 7: Learning, Licensing & Readiness")
+
+    learning_readiness_options = [
+        "I am ready to learn new skills",
+        "I can learn if it fits my schedule",
+        "I prefer to use skills I already have",
+        "I am open to formal education if necessary",
+        "I am not sure yet"
+    ]
+
+    learning_readiness = st.selectbox(
+        "How willing and able are you to learn new skills?",
+        learning_readiness_options,
+        index=1
+    )
+
+    learning_format_options = [
+        "Self-paced learning",
+        "Short online courses",
+        "In-person classes",
+        "Mentorship or apprenticeship",
+        "College or formal school",
+        "A combination",
+        "Not sure yet"
+    ]
+
+    learning_format = st.multiselect(
+        "Which learning formats could realistically work for your lifestyle?",
+        learning_format_options,
+        default=["Self-paced learning", "Short online courses"]
+    )
+
+    credential_options = [
+        "Yes, if legally required",
+        "Yes, if it increases income or credibility",
+        "Open to short-term certification only",
+        "Open to licensing or formal education",
+        "Prefer opportunities with no license required",
+        "Not sure yet"
+    ]
+
+    credential_willingness = st.selectbox(
+        "How open are you to certification, licensing, or formal qualifications?",
+        credential_options,
+        index=1
+    )
+
+    education_constraints = st.text_area(
+        "What could limit or shape your learning path?",
+        height=110,
+        placeholder=(
+            "Examples: work schedule, family responsibilities, transportation, budget, "
+            "need for online study, limited time, desire for evening classes, or no major restrictions."
+        )
+    )
+
+    st.markdown("### ⚖️ Section 8: Capacity + Risk")
 
     col7, col8 = st.columns(2)
 
@@ -573,7 +685,7 @@ def run():
             if autofill_value("income_goal", "Both fast income and long-term wealth") in income_options else 2
         )
 
-    st.markdown("### 🧩 Section 8: Optional Advanced Paste Fields")
+    st.markdown("### 🧩 Section 9: Optional Advanced Paste Fields")
 
     vision_plan = st.text_area(
         "Optional: Paste Vision Builder Plan",
@@ -595,6 +707,27 @@ def run():
         height=120,
         placeholder="Anything else that matters: business ideas, research, local conditions, personal constraints, goals, fears, opportunities, or resources."
     )
+
+    st.markdown("### 🌐 Live Market Intelligence")
+
+    use_live_research = st.checkbox(
+        "Include current web research in my analysis",
+        value=True,
+        help=(
+            "Rain will research current market signals, opportunity trends, and relevant "
+            "licensing or certification considerations before completing the report."
+        )
+    )
+
+    if use_live_research:
+        st.info(
+            "Live research is enabled. Rain will separate verified current findings from "
+            "strategic inference and will include source links in the report."
+        )
+    else:
+        st.caption(
+            "Live research is off. Rain will use your answers and informed strategic reasoning only."
+        )
 
     email_enabled = st.checkbox("✅ Email me this Market Intelligence Report")
     user_email = st.text_input("Enter your email:") if email_enabled else None
@@ -622,7 +755,7 @@ def run():
             st.warning("⚠️ Please complete the main fields before running the analysis. The stronger your inputs, the stronger the intelligence report.")
         else:
             try:
-                with st.spinner("Scanning your market signals, skills, gaps, and opportunity pathways..."):
+                with st.spinner("Rain is analyzing your gifts, market signals, learning path, and strongest opportunities..."):
                     prompt = build_find_where_you_win_prompt(
                         city=city,
                         state=state,
@@ -642,6 +775,10 @@ def run():
                         complaints=complaints,
                         underserved=underserved,
                         opportunity_preferences=", ".join(opportunity_preferences),
+                        learning_readiness=learning_readiness,
+                        learning_format=", ".join(learning_format),
+                        credential_willingness=credential_willingness,
+                        education_constraints=education_constraints,
                         weekly_time=weekly_time,
                         startup_budget=startup_budget,
                         risk_level=risk_level,
@@ -651,24 +788,52 @@ def run():
                         notes=notes,
                     )
 
-                    response = client.chat.completions.create(
-                        model="gpt-4o",
-                        messages=[
-                            {
-                                "role": "system",
-                                "content": (
-                                    "You are Rain Intelligence™, an elite market intelligence strategist, "
-                                    "CMO advisor, local opportunity analyst, and business architect. "
-                                    "Your analysis must be precise, strategic, commercially useful, "
-                                    "demographic-aware, and action-oriented."
-                                ),
-                            },
-                            {"role": "user", "content": prompt},
-                        ],
-                        temperature=0.82,
+                    system_instructions = (
+                        "You are Rain Intelligence™, an elite market intelligence strategist, "
+                        "CMO advisor, local opportunity analyst, capability-development advisor, "
+                        "and business architect. Your analysis must be precise, strategic, "
+                        "commercially useful, demographic-aware, evidence-aware, and action-oriented."
                     )
 
-                    output = response.choices[0].message.content
+                    if use_live_research:
+                        response = client.responses.create(
+                            model=FIND_WHERE_YOU_WIN_MODEL,
+                            tools=[{"type": "web_search"}],
+                            input=[
+                                {
+                                    "role": "system",
+                                    "content": system_instructions,
+                                },
+                                {
+                                    "role": "user",
+                                    "content": (
+                                        "Live web research is enabled for this report. "
+                                        "Research current, relevant evidence and follow all live-research "
+                                        "rules in the prompt.\n\n" + prompt
+                                    ),
+                                },
+                            ],
+                        )
+                    else:
+                        response = client.responses.create(
+                            model=FIND_WHERE_YOU_WIN_MODEL,
+                            input=[
+                                {
+                                    "role": "system",
+                                    "content": system_instructions,
+                                },
+                                {
+                                    "role": "user",
+                                    "content": (
+                                        "Live web research is not enabled. Do not claim current or live "
+                                        "verification. Use informed strategic inference and clearly label it.\n\n"
+                                        + prompt
+                                    ),
+                                },
+                            ],
+                        )
+
+                    output = response.output_text
                     st.session_state["fwyw_output"] = output
 
                     try:
@@ -692,6 +857,10 @@ def run():
                             "Complaints": complaints,
                             "Underserved": underserved,
                             "Opportunity_Preferences": ", ".join(opportunity_preferences),
+                            "Learning_Readiness": learning_readiness,
+                            "Learning_Format": ", ".join(learning_format),
+                            "Credential_Willingness": credential_willingness,
+                            "Education_Constraints": education_constraints,
                             "Weekly_Time": weekly_time,
                             "Startup_Budget": startup_budget,
                             "Risk_Level": risk_level,
@@ -699,6 +868,7 @@ def run():
                             "Vision_Plan": vision_plan,
                             "Network_Plan": network_plan,
                             "Notes": notes,
+                            "Live_Research_Enabled": use_live_research,
                             "Output": output,
                         }, sheet_tab="Find_Where_You_Win")
                     except Exception as save_error:
