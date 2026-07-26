@@ -22,6 +22,7 @@ from reportlab.platypus import (
     Spacer,
 )
 
+from backend.ai_config import FIND_WHERE_YOU_WIN_MODEL
 from backend.email_utils import send_email
 from backend.google_sheets import save_data
 
