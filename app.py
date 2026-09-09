@@ -90,7 +90,7 @@ tier_access = {
         "growth",
         "kpi_tracker",
         "forecasting",
-        "credit_repair"
+        "credit_repair",
         "find_where_you_win"
     ],
 
