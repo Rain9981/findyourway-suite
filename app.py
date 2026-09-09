@@ -160,6 +160,7 @@ tier_access = {
         "crm_manager",
         "crm",
         "crm_dashboard",
+        "rain_intelligence",
 
         # 🔥 keep admin tool
         "admin_user_manager"
@@ -209,6 +210,7 @@ tab_order = [
     "crm",
     "crm_dashboard",
     "find_where_you_win",
+    "rain_intelligence",
 
     # 🔥 keep admin tool visible
     "admin_user_manager"
